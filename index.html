@@ -215,19 +215,25 @@
   .cap span{color:var(--muted)}
   .cap span::before{content:"·";margin-right:8px;color:var(--purple)}
 
-  /* ANÚNCIOS (escondida até receber os links) */
-  .ads{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px;list-style:none}
-  .ad{
-    display:flex;flex-direction:column;gap:6px;min-height:168px;padding:24px;
-    border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-2);text-decoration:none;
-    transition:border-color .3s, background-color .3s, transform .5s var(--ease-out);
+  /* ANÚNCIOS: vídeo nativo, carrega só quando a pessoa aperta o play */
+  .ad-media{position:relative;aspect-ratio:9/16;border-radius:12px;overflow:hidden;background:var(--bg-3)}
+  .ad-media video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
+  .ad-play{
+    position:absolute;inset:0;display:grid;place-items:center;cursor:pointer;border:0;padding:0;
+    background:linear-gradient(180deg, rgba(10,9,14,0) 55%, rgba(10,9,14,.55) 100%);
+    color:#fff;font:inherit;transition:opacity .35s var(--ease-out);
   }
-  .ad b{font-size:20px;line-height:1.25}
-  .ad span{color:var(--muted);font-size:14px}
-  .ad em{margin-top:auto;display:inline-flex;align-items:center;gap:8px;font-style:normal;font-size:14px;font-weight:700;color:var(--purple-soft)}
-  .ad em svg{width:16px;height:16px;transition:transform .35s var(--ease-out)}
-  .ad:hover{border-color:var(--purple);background:var(--bg-3);transform:translateY(-3px)}
-  .ad:hover em svg{transform:translate(3px,-3px)}
+  .ad-play .play{
+    width:72px;height:72px;border-radius:50%;display:grid;place-items:center;
+    background:rgba(10,9,14,.45);border:1px solid rgba(255,255,255,.35);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    transition:transform .4s var(--ease-out), background-color .3s;
+  }
+  .ad-play .play svg{width:26px;height:26px;margin-left:4px}
+  .ad-play:hover .play,.ad-play:focus-visible .play{transform:scale(1.08);background:var(--purple-btn)}
+  .ad-play:focus-visible{outline-offset:-4px}
+  .ad-media.playing .ad-play{opacity:0;pointer-events:none}
+  .ad-cap{display:block;color:var(--muted)}
 
   /* DESIGN (escondida até receber as peças) */
   .posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:24px;list-style:none}
@@ -336,8 +342,8 @@
     <a href="#topo" class="logo" aria-label="Renan Bianchi, voltar ao topo">RENAN<span>.</span>BIANCHI</a>
     <ul>
       <li><a href="#videos">Vídeos</a></li>
-      <!-- Ao publicar as seções novas, apague o "hidden" destas duas linhas: -->
-      <li hidden><a href="#anuncios">Anúncios</a></li>
+      <!-- Ao publicar a seção Design, apague o "hidden" da linha dela: -->
+      <li><a href="#anuncios">Anúncios</a></li>
       <li hidden><a href="#design">Design</a></li>
       <li><a href="#sobre">Sobre</a></li>
       <li><a href="#contato">Contato</a></li>
@@ -399,22 +405,38 @@
   </div>
 </section>
 
-<!-- ============================================================
-     02 — ANÚNCIOS  (escondida)
-     Para publicar: apague o "hidden" da <section> abaixo e o do link "Anúncios" no menu.
-     Em cada card, troque o href pelo link do anúncio na Biblioteca de Anúncios da Meta
-     (facebook.com/ads/library/?id=...). Duplique ou apague cards à vontade.
-     ============================================================ -->
-<section class="block" id="anuncios" hidden>
+<!-- 02 — ANÚNCIOS: os vídeos ficam na pasta "ads" do site (mp4 até 5 MB + capa jpg). -->
+<section class="block" id="anuncios">
   <div class="wrap">
     <div class="head reveal">
       <h2><small>02 — Anúncios</small>Anúncios</h2>
-      <p>[Texto curto sobre os anúncios: ex. roteiros que geram leads qualificados, no ar na Meta.]</p>
+      <p>Criativos em vídeo para Meta Ads, do roteiro à edição. Dê play direto aqui.</p>
     </div>
-    <ul class="ads">
-      <li class="reveal"><a class="ad" href="https://www.facebook.com/ads/library/?id=[ID-DO-ANUNCIO]" target="_blank" rel="noopener"><b>[Cliente]</b><span>[Formato · Objetivo]</span><em>Ver na Biblioteca de Anúncios <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></em></a></li>
-      <li class="reveal" style="--d:.08s"><a class="ad" href="https://www.facebook.com/ads/library/?id=[ID-DO-ANUNCIO]" target="_blank" rel="noopener"><b>[Cliente]</b><span>[Formato · Objetivo]</span><em>Ver na Biblioteca de Anúncios <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></em></a></li>
-      <li class="reveal" style="--d:.16s"><a class="ad" href="https://www.facebook.com/ads/library/?id=[ID-DO-ANUNCIO]" target="_blank" rel="noopener"><b>[Cliente]</b><span>[Formato · Objetivo]</span><em>Ver na Biblioteca de Anúncios <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></em></a></li>
+    <ul class="reels">
+      <li class="reel reveal">
+        <div class="ad-media"><video src="ads/081.mp4" poster="ads/081.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 081 — carro"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 081 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal" style="--d:0.08s">
+        <div class="ad-media"><video src="ads/072.mp4" poster="ads/072.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 072 — carro, 10 carros vendidos"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 072 — carro, 10 carros vendidos"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal" style="--d:0.16s">
+        <div class="ad-media"><video src="ads/084.mp4" poster="ads/084.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 084 — carro"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 084 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal">
+        <div class="ad-media"><video src="ads/119.mp4" poster="ads/119.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 119 — carro, reframe de follow-up"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 119 — carro, reframe de follow-up"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal" style="--d:0.08s">
+        <div class="ad-media"><video src="ads/102.mp4" poster="ads/102.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 102 — moto, IA responde rápido"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 102 — moto, IA responde rápido"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal" style="--d:0.16s">
+        <div class="ad-media"><video src="ads/158.mp4" poster="ads/158.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 158 — venda IA + tráfego"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 158 — venda IA + tráfego"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal">
+        <div class="ad-media"><video src="ads/112.mp4" poster="ads/112.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 112 — caminhão, o cliente está no Instagram"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 112 — caminhão, o cliente está no Instagram"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="reel reveal" style="--d:0.08s">
+        <div class="ad-media"><video src="ads/115.mp4" poster="ads/115.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 115 — caminhão, pergunta de auditoria"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 115 — caminhão, pergunta de auditoria"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
+        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
     </ul>
   </div>
 </section>
@@ -497,6 +519,23 @@
       });
     });
   }
+
+  // Anúncios: o vídeo só baixa quando a pessoa aperta o play; um toca por vez.
+  var adVideos = document.querySelectorAll('.ad-media video');
+  document.querySelectorAll('.ad-play').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var box = btn.parentNode, v = box.querySelector('video');
+      v.controls = true;
+      box.classList.add('playing');
+      var p = v.play(); if (p && p.catch) p.catch(function(){});
+    });
+  });
+  adVideos.forEach(function(v){
+    v.addEventListener('play', function(){
+      v.parentNode.classList.add('playing'); v.controls = true;
+      adVideos.forEach(function(o){ if (o !== v && !o.paused) o.pause(); });
+    });
+  });
 
   // Reels: cada vídeo do Instagram só carrega quando chega perto da tela (página mais leve).
   // Sem o embed.js: o próprio iframe do Instagram avisa a altura e o vídeo aparece por cima da capa.
