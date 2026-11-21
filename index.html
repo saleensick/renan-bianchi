@@ -268,6 +268,20 @@
   .rail .ad-play .play{width:52px;height:52px}
   .rail .ad-play .play svg{width:20px;height:20px}
   .rail figcaption{padding:8px 2px 0;font-size:13px;color:var(--muted)}
+  .proj + .proj{margin-top:16px}
+  .proj h3.long{font-size:clamp(26px,2.6vw,34px);line-height:1.05;text-wrap:balance}
+  .shots{display:grid;grid-template-columns:1fr .58fr;grid-template-rows:auto auto;gap:12px;list-style:none}
+  .shots li{margin:0}
+  /* a captura do celular acompanha a altura das duas de desktop empilhadas */
+  .shots li:last-child{grid-column:2;grid-row:1 / span 2;contain:size}
+  .shots a{display:block;border-radius:12px;transition:transform .5s var(--ease-out)}
+  .shots a:hover{transform:translateY(-3px)}
+  .shots img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--bg-3);transition:border-color .3s}
+  .shots a:hover img{border-color:var(--line-2)}
+  .shots figcaption{padding:8px 2px 0;font-size:13px;color:var(--muted)}
+  .shots li:last-child figure{display:flex;flex-direction:column;height:100%}
+  .shots li:last-child a{flex:1;min-height:0}
+  .shots li:last-child img{height:100%;object-fit:cover;object-position:top}
   .proj-mini{
     display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px;
     margin-top:16px;padding:22px 28px;border:1px solid var(--line);border-radius:var(--radius);
@@ -350,6 +364,8 @@
     .proj{grid-template-columns:1fr;gap:28px;padding:22px}
     .rail{grid-auto-columns:minmax(140px,42%);margin-right:-22px;padding-right:22px}
     section.block.side{padding:64px 0}
+    .shots{gap:10px}
+    .shots figcaption{font-size:12px;padding-top:6px}
     .hero{padding:80px 0 72px}
     section.block{padding:80px 0}
     .head{margin-bottom:40px}
@@ -516,6 +532,18 @@
         <li><figure><img src="projetos/cronomante-tela-2.jpg" alt="Seleção de personagens do Cronomante: Órion, Brisa e um terceiro em breve" width="591" height="1280" loading="lazy"><figcaption>Personagens</figcaption></figure></li>
         <li><figure><img src="projetos/cronomante-tela-3.jpg" alt="Estatísticas do Cronomante: radar de atributos como Zelo, Vigor e Laço" width="591" height="1280" loading="lazy"><figcaption>Estatísticas</figcaption></figure></li>
         <li><figure><img src="projetos/cronomante-tela-4.jpg" alt="Coleção do Cronomante: álbum de cartas ilustradas da temporada Vila Moranda" width="591" height="1280" loading="lazy"><figcaption>Coleção</figcaption></figure></li>
+      </ul>
+    </article>
+    <article class="proj reveal">
+      <div>
+        <h3 class="long">Site institucional — agência de marketing automotivo</h3>
+        <p>Layout, estrutura e desenvolvimento feitos com IA (Claude). Projeto em fase final, ainda não publicado.</p>
+        <ul class="tags"><li>Claude</li><li>Web design</li><li>Landing page</li></ul>
+      </div>
+      <ul class="shots" aria-label="Capturas do site institucional">
+        <li><figure><a href="sites/agencia-hero.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-hero.webp" alt="Topo do site da agência: título Marketing que vira venda, com o fundador ao lado de carro, caminhão e moto" width="1440" height="900" loading="lazy"></a><figcaption>Topo</figcaption></figure></li>
+        <li><figure><a href="sites/agencia-servicos.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-servicos.webp" alt="Seção de serviços do site da agência: Gestão de Tráfego Pago e Social Media e Conteúdo" width="1440" height="900" loading="lazy"></a><figcaption>Serviços</figcaption></figure></li>
+        <li><figure><a href="sites/agencia-celular.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-celular.webp" alt="Topo do site da agência no celular" width="780" height="1688" decoding="async"></a><figcaption>Celular</figcaption></figure></li>
       </ul>
     </article>
     <article class="proj-mini reveal">
