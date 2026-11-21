@@ -247,6 +247,37 @@
   .post:hover img,.post:hover .ph{transform:translateY(-4px);border-color:var(--line-2)}
   .post figcaption{padding-top:12px}
 
+  /* PROJETOS AUTORAIS: um degrau abaixo de Reels e Anúncios */
+  section.block.side{padding:88px 0}
+  .side h2{font-size:clamp(36px,4.4vw,56px)}
+  .proj{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center;
+    padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-2);
+  }
+  .proj h3,.proj-mini h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;line-height:1}
+  .proj h3{font-size:clamp(32px,3.4vw,44px);margin-bottom:16px}
+  .proj p{color:var(--muted);max-width:52ch;margin-bottom:22px;text-wrap:pretty}
+  .rail{
+    display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:12px;
+    overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
+    padding-bottom:10px;list-style:none;scrollbar-width:thin;
+  }
+  .rail > li{scroll-snap-align:start}
+  .rail img,.rail .ad-media{display:block;width:100%;aspect-ratio:9/19.5;height:auto;object-fit:cover;object-position:top;border-radius:12px;border:1px solid var(--line);background:var(--bg-3)}
+  .rail .ad-media{border-color:var(--line-2)}
+  .rail .ad-play .play{width:52px;height:52px}
+  .rail .ad-play .play svg{width:20px;height:20px}
+  .rail figcaption{padding:8px 2px 0;font-size:13px;color:var(--muted)}
+  .proj-mini{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px;
+    margin-top:16px;padding:22px 28px;border:1px solid var(--line);border-radius:var(--radius);
+  }
+  .proj-mini h3{font-size:26px;margin-bottom:6px}
+  .proj-mini p{color:var(--muted);font-size:15px;max-width:56ch}
+  .proj-mini .btn{min-height:44px;padding:10px 20px;font-size:14px}
+  .proj-mini .btn svg{width:16px;height:16px;transition:transform .35s var(--ease-out)}
+  .proj-mini .btn:hover svg{transform:translate(2px,-2px)}
+
   /* ABOUT / SKILLS */
   .about{display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start}
   .about h2{margin-bottom:36px}
@@ -316,6 +347,9 @@
     .num:nth-child(2){border-right:0}
     .num:nth-child(-n+2){border-bottom:1px solid var(--line)}
     .about{grid-template-columns:1fr;gap:48px}
+    .proj{grid-template-columns:1fr;gap:28px;padding:22px}
+    .rail{grid-auto-columns:minmax(140px,42%);margin-right:-22px;padding-right:22px}
+    section.block.side{padding:64px 0}
     .hero{padding:80px 0 72px}
     section.block{padding:80px 0}
     .head{margin-bottom:40px}
@@ -345,6 +379,7 @@
       <!-- Ao publicar a seção Design, apague o "hidden" da linha dela: -->
       <li><a href="#anuncios">Anúncios</a></li>
       <li hidden><a href="#design">Design</a></li>
+      <li><a href="#projetos">Projetos</a></li>
       <li><a href="#sobre">Sobre</a></li>
       <li><a href="#contato">Contato</a></li>
     </ul>
@@ -463,6 +498,37 @@
   </div>
 </section>
 
+<!-- PROJETOS AUTORAIS: mídias na pasta "projetos" do site -->
+<section class="block side" id="projetos">
+  <div class="wrap">
+    <div class="head reveal">
+      <h2>Projetos autorais</h2>
+    </div>
+    <article class="proj reveal">
+      <div>
+        <h3>Cronomante</h3>
+        <p>App de produtividade gamificado: as tarefas da rotina viram a evolução de um personagem de RPG. Concebi e desenvolvi o app com IA (Claude Code) e cuido de toda a divulgação em vídeo, com edição em Remotion e narração com ElevenLabs.</p>
+        <ul class="tags"><li>Claude Code</li><li>Remotion</li><li>ElevenLabs</li><li>Produto</li></ul>
+      </div>
+      <ul class="rail" aria-label="Telas e vídeo do Cronomante">
+        <li><figure><div class="ad-media"><video src="projetos/cronomante-ep04.mp4" poster="projetos/cronomante-ep04.jpg" preload="none" playsinline width="720" height="1280" aria-label="Vídeo de divulgação do Cronomante"></video><button class="ad-play" type="button" aria-label="Reproduzir vídeo de divulgação do Cronomante"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div><figcaption>Vídeo de divulgação</figcaption></figure></li>
+        <li><figure><img src="projetos/cronomante-tela-1.jpg" alt="Tela inicial do Cronomante: personagem Órion no nível 4, barra de XP e missões do dia" width="591" height="1280" loading="lazy"><figcaption>Personagem</figcaption></figure></li>
+        <li><figure><img src="projetos/cronomante-tela-2.jpg" alt="Seleção de personagens do Cronomante: Órion, Brisa e um terceiro em breve" width="591" height="1280" loading="lazy"><figcaption>Personagens</figcaption></figure></li>
+        <li><figure><img src="projetos/cronomante-tela-3.jpg" alt="Estatísticas do Cronomante: radar de atributos como Zelo, Vigor e Laço" width="591" height="1280" loading="lazy"><figcaption>Estatísticas</figcaption></figure></li>
+        <li><figure><img src="projetos/cronomante-tela-4.jpg" alt="Coleção do Cronomante: álbum de cartas ilustradas da temporada Vila Moranda" width="591" height="1280" loading="lazy"><figcaption>Coleção</figcaption></figure></li>
+      </ul>
+    </article>
+    <article class="proj-mini reveal">
+      <div>
+        <h3>Eugência</h3>
+        <p>Metodologia própria de posicionamento de marca em 90 dias para prestadores de serviço.</p>
+      </div>
+      <a class="btn" href="https://www.instagram.com/renanbianchi.pro/" target="_blank" rel="noopener">Ver no Instagram
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+    </article>
+  </div>
+</section>
+
 <section class="block" id="sobre">
   <div class="wrap about">
     <div class="reveal">
@@ -486,7 +552,7 @@
     <div class="cta">
       <a class="btn primary" href="https://wa.me/5511997468837" target="_blank" rel="noopener">WhatsApp</a>
       <a class="btn" href="mailto:renan.10999@gmail.com">E-mail</a>
-      <a class="btn" href="https://www.linkedin.com/in/renan-ribeiro-8ba70a176" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn" href="https://www.linkedin.com/in/renan-bianchi-8ba70a176" target="_blank" rel="noopener">LinkedIn</a>
       <a class="btn" href="https://www.instagram.com/renanbianchi.pro/" target="_blank" rel="noopener">Instagram</a>
     </div>
     <p class="contact-lines"><a href="tel:+5511997468837">(11) 99746-8837</a><span aria-hidden="true">·</span><a href="mailto:renan.10999@gmail.com">renan.10999@gmail.com</a></p>
