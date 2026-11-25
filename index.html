@@ -26,360 +26,336 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- fontes sem bloquear a primeira pintura -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@500&family=Manrope:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@500&family=Manrope:wght@400;700&display=swap"></noscript>
 <style>
   :root{
-    --bg:#0a090e;
-    --bg-2:#121019;
-    --bg-3:#191523;
-    --line:#2a2435;
-    --line-2:#3b3249;
-    --text:#ece8f4;
-    --muted:#aea6c6;
-    --purple:#8b5cf6;
-    --purple-deep:#5b2fd6;
-    --purple-soft:#c4b0ff;
-    --purple-btn:#7c3aed;
-    --ease-out:cubic-bezier(.16,1,.3,1);
+    --bg:#0a090e; --bg-2:#121019; --bg-3:#191523;
+    --line:#2a2435; --line-2:#3b3249;
+    --text:#ece8f4; --muted:#aea6c6;
+    --purple:#8b5cf6; --purple-deep:#5b2fd6; --purple-soft:#c4b0ff; --purple-btn:#7c3aed;
+    --ease:cubic-bezier(.16,1,.3,1);
     --radius:18px;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;scroll-padding-top:80px;scrollbar-color:var(--line-2) var(--bg)}
+
+  /* TEMA POR CAPÍTULO: cada tela usa fundo + uma cor; fundo e texto trocam em ~600 ms */
   body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:'Manrope',system-ui,sans-serif;
-    font-size:17px;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-    caret-color:var(--purple);
-    overflow-x:hidden;
+    --c-bg:var(--bg); --c-fg:var(--text); --c-mut:var(--muted); --c-line:var(--line);
+    --c-acc:var(--purple); --c-btn:var(--purple-btn); --c-btn-fg:#fff;
   }
-  ::selection{background:var(--purple-btn);color:#fff}
+  body[data-theme="purple"]{
+    --c-bg:var(--purple); --c-fg:#0a090e; --c-mut:#0a090e; --c-line:rgba(10,9,14,.32);
+    --c-acc:#0a090e; --c-btn:#0a090e; --c-btn-fg:#ece8f4;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:72px;scrollbar-color:var(--line-2) var(--bg)}
+  body{
+    background:var(--c-bg);color:var(--c-fg);
+    font-family:'Manrope',system-ui,sans-serif;font-size:17px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;caret-color:var(--c-acc);overflow-x:hidden;
+    transition:background-color .6s var(--ease),color .6s var(--ease);
+  }
+  .hud,.hud-foot > *{transition:background-color .6s var(--ease),border-color .6s var(--ease)}
+  ::selection{background:var(--c-fg);color:var(--c-bg)}
   ::-webkit-scrollbar{width:10px}
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:10px;border:2px solid var(--bg)}
-  ::-webkit-scrollbar-thumb:hover{background:var(--purple)}
   a{color:inherit;text-underline-offset:.2em}
-  :focus-visible{outline:2px solid var(--purple-soft);outline-offset:3px;border-radius:6px}
-  main{overflow-x:clip}
-  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
-  .skip{position:absolute;left:16px;top:-60px;z-index:20;background:var(--purple-btn);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;text-decoration:none;transition:top .2s}
-  .skip:focus{top:12px}
+  :focus-visible{outline:2px solid var(--c-fg);outline-offset:3px;border-radius:6px}
   svg{display:block}
+  main{overflow-x:clip}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  .mono{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+  .skip{position:absolute;left:16px;top:-60px;z-index:60;background:var(--purple-btn);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;text-decoration:none;transition:top .2s}
+  .skip:focus{top:12px}
 
-  /* NAV */
-  nav{
-    position:sticky;top:0;z-index:10;
-    background:rgba(10,9,14,.82);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--line);
-  }
-  nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
-  .logo{font-family:'Anton',sans-serif;font-size:22px;letter-spacing:.04em;text-decoration:none;white-space:nowrap}
-  .logo span{color:var(--purple)}
-  nav ul{display:flex;gap:28px;list-style:none}
-  nav ul a{
-    position:relative;text-decoration:none;color:var(--muted);
-    font-size:14px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
-    transition:color .2s;
-  }
-  nav ul a::after{
-    content:"";position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--purple);
-    transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease-out);
-  }
-  nav ul a:hover{color:var(--text)}
-  nav ul a:hover::after{transform:scaleX(1)}
-
-  /* HERO */
-  .hero{
-    position:relative;
-    padding:128px 0 104px;
-    border-bottom:1px solid var(--line);
-    overflow:hidden;
-    isolation:isolate;
-  }
-  /* luz roxa que deriva devagar, como um vazamento de luz de película */
-  .hero::after{
-    content:"";position:absolute;inset:-25%;z-index:-2;pointer-events:none;
-    background:
-      radial-gradient(38% 42% at 78% 22%, rgba(139,92,246,.34), transparent 70%),
-      radial-gradient(30% 34% at 12% 88%, rgba(139,92,246,.15), transparent 70%),
-      radial-gradient(22% 26% at 52% 60%, rgba(91,47,214,.12), transparent 70%);
-    will-change:transform;
-  }
-  /* grão de película: textura cinematográfica, leve (SVG inline) */
-  .hero::before{
-    content:"";position:absolute;inset:-80px;z-index:-1;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .hero .wrap{position:relative}
-  .role{
-    display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:32px;
-    font-size:clamp(17px,1.6vw,21px);font-weight:700;color:var(--text);
-  }
-  .role span:not(:last-child)::after{content:"";display:inline-block;width:6px;height:6px;margin-left:14px;border-radius:50%;background:var(--purple);vertical-align:.18em}
-  h1{
-    font-family:'Anton',sans-serif;font-weight:400;
-    font-size:clamp(64px,11vw,148px);
-    line-height:.92;letter-spacing:.01em;text-transform:uppercase;
-  }
-  h1 .line{display:block;overflow:hidden;padding-bottom:.04em}
-  h1 .line > span{display:inline-block}
-  h1 em{font-style:normal;color:var(--purple)}
-  .lead{max-width:600px;margin-top:18px;font-size:20px;line-height:1.55;color:var(--muted);text-wrap:pretty}
-  .lead strong{color:var(--text);font-weight:700}
-  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:40px}
+  /* BOTÕES */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:10px;
     min-height:48px;padding:13px 24px;border-radius:999px;
-    font-weight:700;font-size:15px;text-decoration:none;
-    border:1px solid var(--line-2);background:transparent;
-    transition:background-color .25s, border-color .25s, color .25s, transform .25s var(--ease-out), box-shadow .25s;
+    font:700 15px/1 'Manrope',sans-serif;text-decoration:none;cursor:pointer;
+    color:var(--c-fg);background:transparent;border:1px solid var(--c-line);
+    transition:background-color .25s,border-color .25s,transform .35s var(--ease);
   }
   .btn svg{width:18px;height:18px;flex:none}
-  .btn.primary{background:var(--purple-btn);border-color:var(--purple-btn);color:#fff}
-  .btn.primary:hover{background:#6d28d9;border-color:#6d28d9;box-shadow:0 12px 28px -12px rgba(0,0,0,.9)}
-  .btn:not(.primary):hover{border-color:var(--purple-soft);background:rgba(139,92,246,.08)}
-  .btn:hover{transform:translateY(-2px)}
-  .btn:active{transform:translateY(0)}
+  .btn:hover{border-color:var(--c-fg);transform:translateY(-2px)}
+  .btn:active{transform:none}
+  .btn.primary{background:var(--c-btn);border-color:var(--c-btn);color:var(--c-btn-fg)}
+  .btn.primary:hover{box-shadow:0 12px 28px -14px rgba(0,0,0,.9)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
 
-  /* NUMBERS */
-  .numbers{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
-  .num{padding:44px 24px 40px;border-right:1px solid var(--line)}
-  .num:last-child{border-right:0}
-  .num b{display:block;font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(44px,5vw,68px);line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
-  .num b i{font-style:normal;color:var(--purple)}
-  .num span{display:block;margin-top:12px;font-size:14px;line-height:1.45;color:var(--muted);max-width:22ch}
+  /* HUD FIXO */
+  .hud{
+    position:fixed;inset:0 0 auto 0;z-index:40;height:64px;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:0 24px;
+    background:color-mix(in srgb,var(--c-bg) 86%,transparent);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--c-line);
+  }
+  .hud-logo{font-family:'Anton',sans-serif;font-size:21px;letter-spacing:.04em;text-decoration:none;white-space:nowrap;justify-self:start}
+  .hud-logo span{color:var(--c-acc)}
+  .hud-thesis{font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+  .hud-thesis em{font-style:normal;color:var(--c-acc)}
+  .hud-right{display:flex;align-items:center;gap:10px;justify-self:end}
+  .hud-menu{
+    display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;
+    background:transparent;color:var(--c-fg);border:1px solid var(--c-line);cursor:pointer;
+    transition:border-color .25s;
+  }
+  .hud-menu:hover{border-color:var(--c-fg)}
+  .hud-menu i{display:grid;gap:4px;width:14px}
+  .hud-menu i b{display:block;height:1.5px;background:currentColor}
+  .hud-wa{min-height:40px;padding:0 16px;font-size:14px}
+  .hud-wa svg{width:16px;height:16px}
+  .hud-foot{
+    position:fixed;inset:auto 0 0 0;z-index:39;pointer-events:none;
+    display:flex;justify-content:space-between;align-items:center;padding:0 24px 18px;
+  }
+  .hud-foot > *{
+    pointer-events:auto;display:inline-flex;align-items:center;gap:10px;padding:7px 12px;border-radius:999px;
+    background:color-mix(in srgb,var(--c-bg) 86%,transparent);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--c-line);
+  }
+  .hud-prog{width:64px;height:2px;background:var(--c-line);position:relative;overflow:hidden}
+  .hud-prog b{position:absolute;inset:0;background:var(--c-fg);transform-origin:left;transform:scaleX(0);transition:transform .6s var(--ease)}
 
-  /* SECTIONS */
-  section.block{padding:112px 0;border-bottom:1px solid var(--line)}
-  .head{display:flex;justify-content:space-between;align-items:end;gap:24px 48px;margin-bottom:56px;flex-wrap:wrap}
-  h2{
-    font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;
-    font-size:clamp(44px,6vw,80px);line-height:1;
+  /* ÍNDICE (pular para) */
+  .menu{
+    position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--text);
+    display:grid;grid-template-rows:auto 1fr auto;padding:20px 24px 28px;
+    opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility 0s .4s;
   }
-  h2 small{display:block;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--purple-soft);margin-bottom:14px}
-  .head p{max-width:400px;color:var(--muted);text-wrap:pretty}
+  .menu.open{opacity:1;visibility:visible;transition:opacity .4s var(--ease)}
+  .menu-top{display:flex;justify-content:space-between;align-items:center}
+  .menu-close{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--text);cursor:pointer}
+  .menu ol{list-style:none;align-self:center;max-width:1240px;width:100%;margin:0 auto;display:grid;gap:2px}
+  .menu ol a{
+    display:flex;align-items:baseline;gap:18px;text-decoration:none;
+    font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(30px,5.4vw,64px);line-height:1.08;
+    color:var(--muted);transition:color .25s,transform .4s var(--ease);
+  }
+  .menu ol a .mono{font-size:13px;color:var(--purple-soft);min-width:3.2em}
+  .menu ol a:hover,.menu ol a[aria-current="true"]{color:var(--text);transform:translateX(8px)}
+  .menu ol a[aria-current="true"]::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--purple);align-self:center}
+  .menu-foot{display:flex;flex-wrap:wrap;gap:12px;max-width:1240px;width:100%;margin:0 auto}
+  .menu-foot .btn{color:var(--text);border-color:var(--line-2)}
+  .menu-foot .btn.primary{background:var(--purple-btn);border-color:var(--purple-btn);color:#fff}
 
-  /* REELS GRID */
-  .reels{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(min(326px,100%),1fr));
-    gap:28px 24px;
-    align-items:start;
-    list-style:none;
+  /* CAPÍTULOS */
+  .ch{position:relative;min-height:100svh;padding:136px 0 128px}
+  .ch-head{
+    position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);align-items:end;gap:20px 48px;
+    padding-bottom:28px;margin-bottom:56px;border-bottom:1px solid var(--c-line);
   }
-  .reel{
-    background:var(--bg-2);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:10px;
-    overflow:hidden;
-    transition:border-color .35s, transform .5s var(--ease-out), box-shadow .5s var(--ease-out);
-  }
-  .reel:hover{
-    border-color:var(--line-2);
-    transform:translateY(-4px);
-    box-shadow:0 28px 48px -24px rgba(0,0,0,.9);
-  }
+  .ch-head::before,.ch-head::after{content:"+";position:absolute;bottom:-11px;font:400 16px/1 var(--mono);color:var(--c-fg)}
+  .ch-head::before{left:-5px}
+  .ch-head::after{right:-5px}
+  .ch-num{display:block;margin-bottom:14px;color:var(--c-mut)}
+  h2{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(56px,9vw,132px);line-height:.92;letter-spacing:.005em;padding-top:.14em}
+  .ch-head p.lead2{color:var(--c-mut);text-wrap:pretty}
+  .brk{display:flex;flex-wrap:wrap;align-items:center;gap:8px 0;margin-top:18px}
+  .brk span{white-space:nowrap}
+  .brk i{display:block;width:28px;height:1px;background:var(--c-fg);margin:0 10px;opacity:.6}
 
-  /* capa roxa de reserva: aparece antes do embed carregar ou se o Instagram falhar */
-  .reel blockquote{
-    position:relative;display:block;
-    aspect-ratio:322/633;
-    border-radius:12px;overflow:hidden;
-    background:
-      radial-gradient(90% 60% at 50% 38%, rgba(139,92,246,.55), transparent 70%),
-      linear-gradient(180deg, var(--purple-deep) 0%, #24133f 55%, var(--bg-3) 100%);
+  /* (00) PLAY */
+  .ch-play{display:flex;align-items:center;padding:112px 0 96px}
+  .play-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:center;gap:48px}
+  .ch-play .ch-num{margin-bottom:22px}
+  h1{
+    font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(68px,11vw,156px);
+    line-height:.9;letter-spacing:.01em;text-transform:uppercase;
   }
-  .reel blockquote a{
-    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-    text-decoration:none;color:#fff;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  }
-  .reel blockquote .play{
-    width:72px;height:72px;border-radius:50%;display:grid;place-items:center;
-    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
-    transition:transform .4s var(--ease-out), background-color .3s;
-  }
-  .reel blockquote .play svg{width:26px;height:26px;margin-left:4px}
-  .reel blockquote a:hover .play{transform:scale(1.08);background:rgba(255,255,255,.2)}
-  /* o vídeo entra por cima da capa quando o Instagram informa a altura */
-  .reel blockquote.ready{aspect-ratio:auto;height:var(--h)}
-  .ig-frame{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px;opacity:0;transition:opacity .6s var(--ease-out)}
-  .reel blockquote.ready .ig-frame{opacity:1}
+  h1 .line{display:block;overflow:hidden;padding-bottom:.04em}
+  h1 .line > span{display:inline-block}
+  h1 em{font-style:normal;color:var(--c-acc)}
+  .role{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:30px;font-size:clamp(17px,1.6vw,21px);font-weight:700}
+  .role span:not(:last-child)::after{content:"";display:inline-block;width:6px;height:6px;margin-left:14px;border-radius:50%;background:var(--c-acc);vertical-align:.18em}
+  .lead{max-width:560px;margin-top:16px;font-size:19px;line-height:1.55;color:var(--c-mut);text-wrap:pretty}
+  .lead strong{color:var(--c-fg)}
+  .ch-play .cta{margin-top:36px}
+  .visual{position:relative;color:var(--c-fg)}
+  .visual svg{width:100%;height:auto;overflow:visible}
+  .visual .tri-dots{transform-origin:45% 50%}
+  .visual text{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.08em;fill:currentColor}
 
+  /* (01) NÚMEROS */
+  .stat{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);align-items:end;gap:16px 40px;
+    min-height:58svh;padding:48px 0 36px;border-bottom:1px solid var(--c-line);
+  }
+  .stat:first-of-type{border-top:1px solid var(--c-line)}
+  .stat b{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(132px,27vw,380px);line-height:.8;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .stat b i{font-style:normal}
+  .stat p{font-size:20px;line-height:1.35;font-weight:700}
+  .stat p .mono{display:block;font-size:12px;margin-bottom:10px;font-weight:500}
+
+  /* GRADES DE VÍDEO */
+  .reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:28px 24px;align-items:start;list-style:none}
+  .card{
+    padding:10px;border-radius:var(--radius);border:1px solid var(--c-line);
+    background:color-mix(in srgb,var(--c-fg) 4%,transparent);
+    transition:border-color .35s,transform .5s var(--ease),box-shadow .5s var(--ease);
+  }
+  .card:hover{border-color:var(--c-fg);transform:translateY(-4px);box-shadow:0 28px 48px -26px rgba(0,0,0,.85)}
   .cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:14px 8px 6px;font-size:14px;line-height:1.4}
-  .cap b{font-weight:700;color:var(--text)}
-  .cap span{color:var(--muted)}
-  .cap span::before{content:"·";margin-right:8px;color:var(--purple)}
+  .cap b{font-weight:700}
+  .cap span{color:var(--c-mut)}
+  .cap span::before{content:"·";margin-right:8px}
 
-  /* ANÚNCIOS: vídeo nativo, carrega só quando a pessoa aperta o play */
-  .ad-media{position:relative;aspect-ratio:9/16;border-radius:12px;overflow:hidden;background:var(--bg-3)}
-  .ad-media video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
-  .ad-play{
-    position:absolute;inset:0;display:grid;place-items:center;cursor:pointer;border:0;padding:0;
-    background:linear-gradient(180deg, rgba(10,9,14,0) 55%, rgba(10,9,14,.55) 100%);
-    color:#fff;font:inherit;transition:opacity .35s var(--ease-out);
+  /* Reels (embed do Instagram) com capa roxa de reserva */
+  .card blockquote{
+    position:relative;display:block;aspect-ratio:322/633;border-radius:12px;overflow:hidden;
+    background:radial-gradient(90% 60% at 50% 38%,rgba(139,92,246,.55),transparent 70%),linear-gradient(180deg,var(--purple-deep) 0%,#24133f 55%,var(--bg-3) 100%);
   }
-  .ad-play .play{
-    width:72px;height:72px;border-radius:50%;display:grid;place-items:center;
+  .card blockquote a{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-decoration:none;color:#fff;font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .card blockquote.ready{aspect-ratio:auto;height:var(--h)}
+  .ig-frame{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px;opacity:0;transition:opacity .6s var(--ease)}
+  .card blockquote.ready .ig-frame{opacity:1}
+  .play{
+    width:72px;height:72px;border-radius:50%;display:grid;place-items:center;color:#fff;
     background:rgba(10,9,14,.45);border:1px solid rgba(255,255,255,.35);
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-    transition:transform .4s var(--ease-out), background-color .3s;
+    transition:transform .4s var(--ease),background-color .3s,opacity .3s;
   }
-  .ad-play .play svg{width:26px;height:26px;margin-left:4px}
-  .ad-play:hover .play,.ad-play:focus-visible .play{transform:scale(1.08);background:var(--purple-btn)}
-  .ad-play:focus-visible{outline-offset:-4px}
-  .ad-media.playing .ad-play{opacity:0;pointer-events:none}
-  .ad-cap{display:block;color:var(--muted)}
+  .play svg{width:26px;height:26px;margin-left:4px}
 
-  /* DESIGN (escondida até receber as peças) */
-  .posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:24px;list-style:none}
-  .post figure{margin:0}
-  .post img,.post .ph{
-    display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;
-    border-radius:14px;border:1px solid var(--line);background:var(--bg-2);
-    transition:transform .5s var(--ease-out), border-color .3s;
-  }
-  .post .ph{background:linear-gradient(160deg,#24133f,var(--bg-3))}
-  .post:hover img,.post:hover .ph{transform:translateY(-4px);border-color:var(--line-2)}
-  .post figcaption{padding-top:12px}
+  /* Vídeo nativo: prévia muda no hover (desktop), clique abre em tela cheia com som */
+  .vid{position:relative;aspect-ratio:9/16;border-radius:12px;overflow:hidden;background:#000}
+  .vid video{display:block;width:100%;height:100%;object-fit:cover}
+  .vid-btn{position:absolute;inset:0;display:grid;place-items:center;border:0;padding:0;cursor:pointer;color:#fff;font:inherit;
+    background:linear-gradient(180deg,rgba(10,9,14,0) 55%,rgba(10,9,14,.55) 100%);transition:background-color .3s}
+  .vid-btn .mono{position:absolute;left:12px;bottom:12px;color:#fff;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .4s var(--ease)}
+  .vid-btn:hover .play,.vid-btn:focus-visible .play{transform:scale(1.08);background:var(--purple-btn)}
+  .vid-btn:focus-visible{outline-offset:-4px}
+  .vid.preview .vid-btn{background:transparent}
+  .vid.preview .play{opacity:0}
+  .vid.preview .vid-btn .mono{opacity:1;transform:none}
+  .vid.full .vid-btn{opacity:0;pointer-events:none}
 
-  /* PROJETOS AUTORAIS: um degrau abaixo de Reels e Anúncios */
-  section.block.side{padding:88px 0}
-  .side h2{font-size:clamp(36px,4.4vw,56px)}
-  .proj{
-    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center;
-    padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-2);
-  }
-  .proj h3,.proj-mini h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;line-height:1}
-  .proj h3{font-size:clamp(32px,3.4vw,44px);margin-bottom:16px}
-  .proj p{color:var(--muted);max-width:52ch;margin-bottom:22px;text-wrap:pretty}
-  .rail{
-    display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:12px;
-    overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
-    padding-bottom:10px;list-style:none;scrollbar-width:thin;
-  }
-  .rail > li{scroll-snap-align:start}
-  .rail img,.rail .ad-media{display:block;width:100%;aspect-ratio:9/19.5;height:auto;object-fit:cover;object-position:top;border-radius:12px;border:1px solid var(--line);background:var(--bg-3)}
-  .rail .ad-media{border-color:var(--line-2)}
-  .rail .ad-play .play{width:52px;height:52px}
-  .rail .ad-play .play svg{width:20px;height:20px}
-  .rail figcaption{padding:8px 2px 0;font-size:13px;color:var(--muted)}
-  .proj + .proj{margin-top:16px}
+  /* (04) PROJETOS */
+  .sub{padding-top:8px}
+  .sub + .sub{margin-top:56px}
+  .sub-label{display:flex;align-items:center;gap:12px;margin-bottom:18px;color:var(--c-mut)}
+  .sub-label::after{content:"";flex:1;height:1px;background:var(--c-line)}
+  .proj{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center;padding:28px;border:1px solid var(--c-line);border-radius:var(--radius);background:color-mix(in srgb,var(--c-fg) 4%,transparent)}
+  .proj h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;line-height:1;font-size:clamp(32px,3.4vw,46px);margin-bottom:16px}
   .proj h3.long{font-size:clamp(26px,2.6vw,34px);line-height:1.05;text-wrap:balance}
+  .proj p{color:var(--c-mut);max-width:52ch;margin-bottom:22px;text-wrap:pretty}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
+  .tags li{font-size:14px;padding:6px 14px;border-radius:999px;border:1px solid var(--c-line)}
+  .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-bottom:10px;list-style:none;scrollbar-width:thin}
+  .rail > li{scroll-snap-align:start}
+  .rail img,.rail .vid{display:block;width:100%;aspect-ratio:9/19.5;height:auto;object-fit:cover;object-position:top;border-radius:12px;border:1px solid var(--c-line);background:var(--bg-3)}
+  .rail .play{width:52px;height:52px}
+  .rail .play svg{width:20px;height:20px}
+  figcaption{padding:8px 2px 0;font-size:13px;color:var(--c-mut)}
   .shots{display:grid;grid-template-columns:1fr .58fr;grid-template-rows:auto auto;gap:12px;list-style:none}
-  .shots li{margin:0}
-  /* a captura do celular acompanha a altura das duas de desktop empilhadas */
   .shots li:last-child{grid-column:2;grid-row:1 / span 2;contain:size}
-  .shots a{display:block;border-radius:12px;transition:transform .5s var(--ease-out)}
+  .shots a{display:block;border-radius:12px;transition:transform .5s var(--ease)}
   .shots a:hover{transform:translateY(-3px)}
-  .shots img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--bg-3);transition:border-color .3s}
-  .shots a:hover img{border-color:var(--line-2)}
-  .shots figcaption{padding:8px 2px 0;font-size:13px;color:var(--muted)}
+  .shots img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--c-line);background:var(--bg-3)}
   .shots li:last-child figure{display:flex;flex-direction:column;height:100%}
   .shots li:last-child a{flex:1;min-height:0}
   .shots li:last-child img{height:100%;object-fit:cover;object-position:top}
-  .proj-mini{
-    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px;
-    margin-top:16px;padding:22px 28px;border:1px solid var(--line);border-radius:var(--radius);
+  .proj-mini{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px;padding:24px 28px;border:1px solid var(--c-line);border-radius:var(--radius)}
+  .proj-mini h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:28px;line-height:1;margin-bottom:8px}
+  .proj-mini p{color:var(--c-mut);font-size:15px;max-width:56ch}
+  .proj-mini .btn svg{width:16px;height:16px}
+
+  /* (05) HABILIDADES: índice tipográfico */
+  .idx + .idx{margin-top:56px}
+  .idx > .mono{margin-bottom:14px}
+  .idx ul{list-style:none;display:flex;flex-wrap:wrap;gap:0 .28em;font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(34px,5.6vw,84px);line-height:1.02}
+  .idx li{transition:opacity .35s var(--ease)}
+  .idx li:not(:last-child)::after{content:"/";margin-left:.28em;opacity:.35}
+  @media (hover:hover){
+    .idx ul:hover li{opacity:.32}
+    .idx ul li:hover{opacity:1}
   }
-  .proj-mini h3{font-size:26px;margin-bottom:6px}
-  .proj-mini p{color:var(--muted);font-size:15px;max-width:56ch}
-  .proj-mini .btn{min-height:44px;padding:10px 20px;font-size:14px}
-  .proj-mini .btn svg{width:16px;height:16px;transition:transform .35s var(--ease-out)}
-  .proj-mini .btn:hover svg{transform:translate(2px,-2px)}
 
-  /* ABOUT / SKILLS */
-  .about{display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start}
-  .about h2{margin-bottom:36px}
-  .about p{color:var(--muted);margin-bottom:18px;max-width:58ch;text-wrap:pretty}
-  .about p strong{color:var(--text)}
-  .skills{display:grid;gap:22px}
-  .skill{border-top:1px solid var(--line);padding-top:18px}
-  .skill h3{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--purple-soft);margin-bottom:12px}
-  .tags{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
-  .tags li{
-    font-size:14px;padding:6px 14px;border-radius:999px;
-    border:1px solid var(--line);background:var(--bg-2);
-    transition:border-color .25s, color .25s;
-  }
-  .tags li:hover{border-color:var(--purple);color:#fff}
+  /* (06) SOBRE */
+  .about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px 72px;align-items:start}
+  .about p{color:var(--c-mut);max-width:56ch;text-wrap:pretty;font-size:19px}
+  .about p + p{margin-top:18px}
+  .about p strong{color:var(--c-fg)}
+  .facts{list-style:none;border-top:1px solid var(--c-line)}
+  .facts li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--c-line)}
+  .facts li .mono{padding-top:4px}
 
-  /* CONTACT */
-  .contact{position:relative;padding:136px 0 128px;text-align:center;overflow:hidden;
-    background:radial-gradient(50% 80% at 50% 100%, rgba(139,92,246,.24), transparent 70%)}
-  .contact h2{font-size:clamp(56px,9vw,128px);line-height:.95}
-  .contact p{color:var(--muted);margin:24px auto 40px;max-width:520px}
-  .contact .cta{justify-content:center}
-  .contact-lines{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:36px;color:var(--muted);font-size:15px;font-variant-numeric:tabular-nums}
-  .contact-lines a{text-decoration:none;transition:color .2s}
-  .contact-lines a:hover{color:var(--text);text-decoration:underline}
-  .contact-lines span{color:var(--line-2)}
-  footer{padding:28px 0;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  /* (07) RENAN */
+  .ch-name{display:flex;flex-direction:column;justify-content:center}
+  .big-name{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(110px,27vw,400px);line-height:.82;letter-spacing:-.005em;margin:12px 0 36px}
+  .closing{font-size:clamp(22px,2.6vw,34px);line-height:1.25;font-weight:700;max-width:24ch;text-wrap:balance}
 
-  /* MOVIMENTO: só com JS e sem "reduzir movimento". Sem JS, tudo aparece normal. */
+  /* (08) CONTATO & CRÉDITOS */
+  .contact h2{font-size:clamp(60px,10vw,140px)}
+  .contact .avail{color:var(--c-mut);margin:18px 0 32px;max-width:520px;font-size:19px}
+  .contact-lines{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:28px;font-variant-numeric:tabular-nums}
+  .contact-lines a{text-decoration:none}
+  .contact-lines a:hover{text-decoration:underline}
+  .credits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:96px;padding-top:28px;border-top:1px solid var(--c-line)}
+  .credits h3{margin-bottom:14px;color:var(--c-mut)}
+  .credits ul{list-style:none;display:grid;gap:6px;font-size:15px}
+  .credits a{text-decoration:none}
+  .credits a:hover{text-decoration:underline}
+  .end{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--c-line)}
+  .end .cta .btn{min-height:44px;padding:10px 20px;font-size:14px}
+  .end small{color:var(--c-mut);font-size:13px}
+
+  /* MOVIMENTO */
   @media (prefers-reduced-motion:no-preference){
-    .js h1 .line > span{animation:rise 1.1s var(--ease-out) both}
+    .js h1 .line > span{animation:rise 1.1s var(--ease) both}
     .js h1 .line:nth-child(2) > span{animation-delay:.12s}
-    .js .hero .role,.js .hero .lead,.js .hero .cta{animation:fade .9s var(--ease-out) both}
-    .js .hero .role{animation-delay:.3s}
-    .js .hero .lead{animation-delay:.4s}
-    .js .hero .cta{animation-delay:.5s}
-    .js .reveal{opacity:0;transform:translateY(28px);filter:blur(6px);
-      transition:opacity .9s var(--ease-out), transform 1.1s var(--ease-out), filter .9s var(--ease-out);
-      transition-delay:var(--d,0s)}
-    .js .reveal.in{opacity:1;transform:none;filter:none}
-    .js .reel.reveal{filter:none}
-    .hero::after{animation:drift 22s ease-in-out infinite alternate}
-    .hero::before{animation:grain 1.2s steps(5) infinite}
-    .hero.off::after,.hero.off::before{animation-play-state:paused}
-  }
-  @keyframes drift{
-    0%{transform:translate3d(0,0,0) scale(1)}
-    50%{transform:translate3d(-6%,4%,0) scale(1.08)}
-    100%{transform:translate3d(4%,-3%,0) scale(1.03)}
-  }
-  @keyframes grain{
-    0%{transform:translate(0,0)}20%{transform:translate(-40px,22px)}40%{transform:translate(28px,-36px)}
-    60%{transform:translate(-18px,-14px)}80%{transform:translate(36px,30px)}100%{transform:translate(0,0)}
+    .js .ch-play .role,.js .ch-play .lead,.js .ch-play .cta{animation:fade .9s var(--ease) both}
+    .js .ch-play .role{animation-delay:.3s}
+    .js .ch-play .lead{animation-delay:.4s}
+    .js .ch-play .cta{animation-delay:.5s}
+    .visual .tri-dots{animation:breathe 5s var(--ease) infinite alternate}
+    .visual.off .tri-dots{animation-play-state:paused}
   }
   @keyframes rise{from{transform:translateY(105%)}to{transform:none}}
   @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes breathe{from{transform:scale(.96);opacity:.75}to{transform:scale(1.02);opacity:1}}
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
   }
 
-  @media (max-width:860px){
-    nav ul{gap:18px}
-    nav ul a{font-size:12px;letter-spacing:.08em}
-    .numbers{grid-template-columns:repeat(2,1fr)}
-    .num{padding:32px 20px}
-    .num:nth-child(2){border-right:0}
-    .num:nth-child(-n+2){border-bottom:1px solid var(--line)}
-    .about{grid-template-columns:1fr;gap:48px}
+  @media (max-width:960px){
+    .hud-thesis{display:none}
+    .hud{grid-template-columns:1fr auto}
+    .play-grid{grid-template-columns:1fr}
+    .visual{max-width:360px}
+    .ch-head{grid-template-columns:1fr}
     .proj{grid-template-columns:1fr;gap:28px;padding:22px}
     .rail{grid-auto-columns:minmax(140px,42%);margin-right:-22px;padding-right:22px}
-    section.block.side{padding:64px 0}
-    .shots{gap:10px}
-    .shots figcaption{font-size:12px;padding-top:6px}
-    .hero{padding:80px 0 72px}
-    section.block{padding:80px 0}
-    .head{margin-bottom:40px}
-    .contact{padding:96px 0}
+    .about{grid-template-columns:1fr}
+    .credits{grid-template-columns:1fr 1fr}
   }
-  @media (max-width:560px){
+  @media (max-width:600px){
     .wrap{padding:0 16px}
-    .logo{font-size:19px}
-    nav ul{gap:14px}
-    nav ul li:nth-child(n+2):not(:last-child){display:none}
+    .hud{padding:0 12px;gap:8px}
+    .hud-logo{font-size:18px}
+    .hud-menu span{display:none}
+    .hud-menu{width:40px;justify-content:center;padding:0}
+    .hud-wa span{display:none}
+    .hud-wa{width:40px;padding:0}
+    .hud-foot{padding:0 12px 12px}
+    .hud-foot .hud-count{display:none}
+    .ch{padding:104px 0 88px}
+    .ch-play{padding:96px 0 72px}
+    .ch-head{margin-bottom:40px}
     .lead{font-size:18px}
-    .cta .btn{flex:1 1 auto}
-    .num{padding:28px 16px}
-    .num span{font-size:13px}
+    .ch-play .cta .btn{flex:1 1 auto}
+    .visual{max-width:300px;margin:8px auto 0}
+    .stat{grid-template-columns:1fr;min-height:46svh}
+    .facts li{grid-template-columns:1fr;gap:4px}
+    .credits{grid-template-columns:1fr;margin-top:64px}
+    .shots{gap:10px}
+    .shots figcaption{font-size:12px}
   }
 </style>
 </head>
@@ -387,281 +363,435 @@
 <script>document.documentElement.classList.add('js')</script>
 <a class="skip" href="#videos">Pular para os vídeos</a>
 
-<nav aria-label="Principal">
-  <div class="wrap">
-    <a href="#topo" class="logo" aria-label="Renan Bianchi, voltar ao topo">RENAN<span>.</span>BIANCHI</a>
-    <ul>
-      <li><a href="#videos">Vídeos</a></li>
-      <!-- Ao publicar a seção Design, apague o "hidden" da linha dela: -->
-      <li><a href="#anuncios">Anúncios</a></li>
-      <li hidden><a href="#design">Design</a></li>
-      <li><a href="#projetos">Projetos</a></li>
-      <li><a href="#sobre">Sobre</a></li>
-      <li><a href="#contato">Contato</a></li>
-    </ul>
+<!-- HUD fixo: logo, tese, índice e WhatsApp sempre à mão -->
+<header class="hud">
+  <a class="hud-logo" href="#topo" aria-label="Renan Bianchi, voltar ao início">RENAN<span>.</span>BIANCHI</a>
+  <p class="hud-thesis" aria-hidden="true">Do roteiro ao <em>play.</em></p>
+  <div class="hud-right">
+    <button class="hud-menu" type="button" aria-label="Abrir índice" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"><b></b><b></b></i><span class="mono">Índice</span></button>
+    <a class="btn primary hud-wa" href="https://wa.me/5511997468837" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.8-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.6-.3z"/></svg>
+      <span>WhatsApp</span></a>
+  </div>
+</header>
+
+<div class="hud-foot" aria-hidden="true">
+  <span class="mono hud-count"><span id="hudCount">00 / 08</span><span class="hud-prog"><b id="hudBar"></b></span></span>
+  <span class="mono"><span id="hudNum">(00)</span> <span id="hudLabel">Play — início</span></span>
+</div>
+
+<nav class="menu" id="menu" aria-label="Índice" role="dialog" aria-modal="true">
+  <div class="menu-top">
+    <span class="hud-logo" style="font-family:Anton,sans-serif;font-size:21px">RENAN<span style="color:var(--purple)">.</span>BIANCHI</span>
+    <button class="menu-close mono" type="button">Fechar</button>
+  </div>
+  <ol>
+    <li><a href="#topo" data-to="00"><span class="mono">(00)</span>Play</a></li>
+    <li><a href="#numeros" data-to="01"><span class="mono">(01)</span>Números</a></li>
+    <li><a href="#videos" data-to="02"><span class="mono">(02)</span>Reels</a></li>
+    <li><a href="#anuncios" data-to="03"><span class="mono">(03)</span>Anúncios</a></li>
+    <li><a href="#projetos" data-to="04"><span class="mono">(04)</span>Projetos</a></li>
+    <li><a href="#habilidades" data-to="05"><span class="mono">(05)</span>Habilidades</a></li>
+    <li><a href="#sobre" data-to="06"><span class="mono">(06)</span>Sobre</a></li>
+    <li><a href="#renan" data-to="07"><span class="mono">(07)</span>Renan</a></li>
+    <li><a href="#contato" data-to="08"><span class="mono">(08)</span>Contato</a></li>
+  </ol>
+  <div class="menu-foot">
+    <a class="btn primary" href="https://wa.me/5511997468837" target="_blank" rel="noopener">Falar no WhatsApp</a>
+    <a class="btn" href="curriculo/Curriculo-Renan-Bianchi.pdf" download>Baixar currículo (PDF)</a>
   </div>
 </nav>
 
 <main>
-<header class="hero" id="topo">
-  <div class="wrap">
-    <h1><span class="line"><span>Do roteiro</span></span><span class="line"><span>ao <em>play.</em></span></span></h1>
-    <p class="role" aria-label="Social Media, Videomaker, Conteúdo com IA"><span>Social Media</span><span>Videomaker</span><span>Conteúdo com IA</span></p>
-    <p class="lead">Sou o <strong>Renan Bianchi</strong>. Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só. <strong>6 anos</strong> em marketing digital, 4 deles em agência.</p>
-    <div class="cta">
-      <a class="btn primary" href="#videos">Ver trabalhos
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
-      <a class="btn" href="https://wa.me/5511997468837" target="_blank" rel="noopener">Falar no WhatsApp</a>
+
+<!-- (00) PLAY -->
+<section class="ch ch-play" id="topo" data-ch="00" data-theme="dark" data-label="Play — início">
+  <div class="wrap play-grid">
+    <div>
+      <span class="ch-num mono">(00) — Play</span>
+      <h1><span class="line"><span>Do roteiro</span></span><span class="line"><span>ao <em>play.</em></span></span></h1>
+      <p class="role" aria-label="Social Media, Videomaker, Conteúdo com IA"><span>Social Media</span><span>Videomaker</span><span>Conteúdo com IA</span></p>
+      <p class="lead">Sou o <strong>Renan Bianchi</strong>. Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só. <strong>6 anos</strong> em marketing digital, 4 deles em agência.</p>
+      <div class="cta">
+        <a class="btn primary" href="#videos">Ver trabalhos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
+        <a class="btn" href="https://wa.me/5511997468837" target="_blank" rel="noopener">Falar no WhatsApp</a>
+      </div>
+    </div>
+    <div class="visual" aria-hidden="true">
+      <svg viewBox="0 0 440 460">
+        <defs>
+          <pattern id="dots" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="6.5" cy="6.5" r="2.4" fill="#8b5cf6"/></pattern>
+        </defs>
+        <g class="tri-dots">
+          <polygon points="96,58 372,230 96,402" fill="url(#dots)"/>
+          <polygon points="96,58 372,230 96,402" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-linejoin="round"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1" opacity=".6">
+          <line x1="96" y1="58" x2="60" y2="22"/><line x1="60" y1="22" x2="24" y2="22"/>
+          <line x1="372" y1="230" x2="410" y2="190"/>
+          <line x1="96" y1="402" x2="60" y2="438"/><line x1="60" y1="438" x2="24" y2="438"/>
+        </g>
+        <text x="24" y="14">[ ROTEIRO ]</text>
+        <text x="300" y="182">[ CAPTAÇÃO ]</text>
+        <text x="24" y="458">[ EDIÇÃO ]</text>
+      </svg>
     </div>
   </div>
-</header>
+</section>
 
-<div class="numbers wrap" style="padding:0">
-  <div class="num reveal"><b>6</b><span>anos em marketing digital</span></div>
-  <div class="num reveal" style="--d:.08s"><b>35<i>+</i></b><span>clientes atendidos como videomaker</span></div>
-  <div class="num reveal" style="--d:.16s"><b>60<i>+</i></b><span>clientes atendidos como designer</span></div>
-  <div class="num reveal" style="--d:.24s"><b>21<i>K</i></b><span>views em um único Reel orgânico</span></div>
-</div>
-
-<section class="block" id="videos">
+<!-- (01) NÚMEROS -->
+<section class="ch" id="numeros" data-ch="01" data-theme="purple" data-label="Números — em resumo">
   <div class="wrap">
-    <div class="head reveal">
-      <h2><small>01 — Vídeos</small>Reels</h2>
-      <p>Roteiro, captação e edição para marcas de nichos diferentes. Dê play direto aqui.</p>
+    <div class="ch-head">
+      <div><span class="ch-num mono">(01) — Números</span><h2>Em números</h2></div>
+    </div>
+    <div class="stat"><b class="count" data-to="6">6</b><p><span class="mono">[ Tempo de estrada ]</span>anos em marketing digital, 4 deles em agência</p></div>
+    <div class="stat"><b class="count" data-to="35" data-suffix="+">35<i>+</i></b><p><span class="mono">[ Vídeo ]</span>clientes atendidos como videomaker</p></div>
+    <div class="stat"><b class="count" data-to="60" data-suffix="+">60<i>+</i></b><p><span class="mono">[ Design ]</span>clientes atendidos como designer</p></div>
+    <div class="stat"><b class="count" data-to="21" data-suffix="K">21<i>K</i></b><p><span class="mono">[ Fonte: um Reel orgânico ]</span>views em um único Reel orgânico</p></div>
+  </div>
+</section>
+
+<!-- (02) REELS -->
+<section class="ch" id="videos" data-ch="02" data-theme="dark" data-label="Reels — captação">
+  <div class="wrap">
+    <div class="ch-head">
+      <div>
+        <span class="ch-num mono">(02) — Vídeos</span><h2>Reels</h2>
+        <p class="brk mono" aria-label="Roteiro, captação e edição"><span>[ Roteiro ]</span><i></i><span>[ Captação ]</span><i></i><span>[ Edição ]</span></p>
+      </div>
+      <p class="lead2">Roteiro, captação e edição para marcas de nichos diferentes. Dê play direto aqui.</p>
     </div>
     <ul class="reels">
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DdR7VBUvK1J/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DdR7VBUvK1J/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DdR7VBUvK1J/"><a href="https://www.instagram.com/p/DdR7VBUvK1J/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Auto Design</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DaNZJDsSixp/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DaNZJDsSixp/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DaNZJDsSixp/"><a href="https://www.instagram.com/p/DaNZJDsSixp/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Auto Design</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DX7dtgxjTuM/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DX7dtgxjTuM/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DX7dtgxjTuM/"><a href="https://www.instagram.com/p/DX7dtgxjTuM/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Auto Prosperità</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DUBp3oLkecM/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DUBp3oLkecM/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DUBp3oLkecM/"><a href="https://www.instagram.com/p/DUBp3oLkecM/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Aliquantum Suzuki</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DYXjY69n29Z/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DYXjY69n29Z/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DYXjY69n29Z/"><a href="https://www.instagram.com/p/DYXjY69n29Z/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Island Motors SJC</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DVv1xVaCXJI/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DVv1xVaCXJI/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DVv1xVaCXJI/"><a href="https://www.instagram.com/p/DVv1xVaCXJI/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Island Motors SJC</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DR4jfYMAphs/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DR4jfYMAphs/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DR4jfYMAphs/"><a href="https://www.instagram.com/p/DR4jfYMAphs/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Dr. Roberto Dente</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DSKh2a0D55F/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DSKh2a0D55F/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DSKh2a0D55F/"><a href="https://www.instagram.com/p/DSKh2a0D55F/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Dr. Roberto Dente</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DVg-vRLDOyB/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DVg-vRLDOyB/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DVg-vRLDOyB/"><a href="https://www.instagram.com/p/DVg-vRLDOyB/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Dra. Adriana Menezes</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DTm_-mZCIXw/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DTm_-mZCIXw/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DTm_-mZCIXw/"><a href="https://www.instagram.com/p/DTm_-mZCIXw/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Dra. Adriana Menezes</b><span>Roteiro · Captação · Edição</span></p></li>
-      <li class="reel reveal"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DbN36yBCTaw/" data-instgrm-version="14"><a href="https://www.instagram.com/p/DbN36yBCTaw/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
+      <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DbN36yBCTaw/"><a href="https://www.instagram.com/p/DbN36yBCTaw/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Barella Caminhões</b><span>Roteiro · Captação</span></p></li>
     </ul>
   </div>
 </section>
 
-<!-- 02 — ANÚNCIOS: os vídeos ficam na pasta "ads" do site (mp4 até 5 MB + capa jpg). -->
-<section class="block" id="anuncios">
+<!-- (03) ANÚNCIOS: vídeos na pasta "ads" (mp4 até 5 MB + capa jpg) -->
+<section class="ch" id="anuncios" data-ch="03" data-theme="purple" data-label="Anúncios — Meta Ads">
   <div class="wrap">
-    <div class="head reveal">
-      <h2><small>02 — Anúncios</small>Anúncios</h2>
-      <p>Criativos em vídeo para Meta Ads, do roteiro à edição. Dê play direto aqui.</p>
+    <div class="ch-head">
+      <div>
+        <span class="ch-num mono">(03) — Anúncios</span><h2>Anúncios</h2>
+        <p class="brk mono" aria-label="Roteiro e edição para Meta Ads"><span>[ Roteiro ]</span><i></i><span>[ Edição ]</span><i></i><span>[ Meta Ads ]</span></p>
+      </div>
+      <p class="lead2">Criativos em vídeo para Meta Ads, do roteiro à edição. Passe o mouse para a prévia; clique para assistir com som.</p>
     </div>
     <ul class="reels">
-      <li class="reel reveal">
-        <div class="ad-media"><video src="ads/081.mp4" poster="ads/081.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 081 — carro"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 081 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal" style="--d:0.08s">
-        <div class="ad-media"><video src="ads/072.mp4" poster="ads/072.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 072 — carro, 10 carros vendidos"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 072 — carro, 10 carros vendidos"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal" style="--d:0.16s">
-        <div class="ad-media"><video src="ads/084.mp4" poster="ads/084.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 084 — carro"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 084 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal">
-        <div class="ad-media"><video src="ads/119.mp4" poster="ads/119.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 119 — carro, reframe de follow-up"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 119 — carro, reframe de follow-up"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal" style="--d:0.08s">
-        <div class="ad-media"><video src="ads/102.mp4" poster="ads/102.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 102 — moto, IA responde rápido"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 102 — moto, IA responde rápido"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal" style="--d:0.16s">
-        <div class="ad-media"><video src="ads/158.mp4" poster="ads/158.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 158 — venda IA + tráfego"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 158 — venda IA + tráfego"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal">
-        <div class="ad-media"><video src="ads/112.mp4" poster="ads/112.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 112 — caminhão, o cliente está no Instagram"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 112 — caminhão, o cliente está no Instagram"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
-      <li class="reel reveal" style="--d:0.08s">
-        <div class="ad-media"><video src="ads/115.mp4" poster="ads/115.jpg" preload="none" playsinline width="720" height="1280" aria-label="Anúncio 115 — caminhão, pergunta de auditoria"></video><button class="ad-play" type="button" aria-label="Reproduzir: Anúncio 115 — caminhão, pergunta de auditoria"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div>
-        <p class="cap ad-cap">Roteiro e edição — criativo para Meta Ads</p></li>
+      <li class="card"><div class="vid"><video src="ads/081.mp4" poster="ads/081.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 081 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 081 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/072.mp4" poster="ads/072.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 072 — carro, 10 carros vendidos"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 072 — carro, 10 carros vendidos"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/084.mp4" poster="ads/084.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 084 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 084 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/119.mp4" poster="ads/119.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 119 — carro, reframe de follow-up"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 119 — carro, reframe de follow-up"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/102.mp4" poster="ads/102.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 102 — moto, IA responde rápido"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 102 — moto, IA responde rápido"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/158.mp4" poster="ads/158.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 158 — venda IA + tráfego"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 158 — venda IA + tráfego"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/112.mp4" poster="ads/112.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 112 — caminhão, o cliente está no Instagram"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 112 — caminhão, o cliente está no Instagram"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
+      <li class="card"><div class="vid"><video src="ads/115.mp4" poster="ads/115.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 115 — caminhão, pergunta de auditoria"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 115 — caminhão, pergunta de auditoria"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+        <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
     </ul>
   </div>
 </section>
 
-<!-- ============================================================
-     03 — DESIGN  (escondida)
-     Para publicar: apague o "hidden" da <section> abaixo e o do link "Design" no menu.
-     Em cada peça, troque <div class="ph" ...></div> por
-     <img src="ENDERECO-DA-IMAGEM" alt="Descrição da peça" width="1080" height="1350" loading="lazy">
-     (a imagem pode ficar no mesmo repositório do site ou em outro endereço público).
-     ============================================================ -->
-<section class="block" id="design" hidden>
+<!-- (04) PROJETOS AUTORAIS -->
+<section class="ch" id="projetos" data-ch="04" data-theme="dark" data-label="Projetos — autorais">
   <div class="wrap">
-    <div class="head reveal">
-      <h2><small>03 — Design</small>Design</h2>
-      <p>[Texto curto sobre os carrosséis e posts.]</p>
+    <div class="ch-head">
+      <div><span class="ch-num mono">(04) — Projetos</span><h2>Projetos autorais</h2></div>
     </div>
-    <ul class="posts">
-      <li class="post reveal"><figure><div class="ph" role="img" aria-label="[Descrição da peça]"></div><figcaption class="cap"><b>[Cliente]</b><span>[Carrossel / Post / Stories]</span></figcaption></figure></li>
-      <li class="post reveal" style="--d:.08s"><figure><div class="ph" role="img" aria-label="[Descrição da peça]"></div><figcaption class="cap"><b>[Cliente]</b><span>[Carrossel / Post / Stories]</span></figcaption></figure></li>
-      <li class="post reveal" style="--d:.16s"><figure><div class="ph" role="img" aria-label="[Descrição da peça]"></div><figcaption class="cap"><b>[Cliente]</b><span>[Carrossel / Post / Stories]</span></figcaption></figure></li>
-      <li class="post reveal" style="--d:.24s"><figure><div class="ph" role="img" aria-label="[Descrição da peça]"></div><figcaption class="cap"><b>[Cliente]</b><span>[Carrossel / Post / Stories]</span></figcaption></figure></li>
-    </ul>
+
+    <div class="sub">
+      <p class="sub-label mono">(04.1) — App</p>
+      <article class="proj">
+        <div>
+          <h3>Cronomante</h3>
+          <p>App de produtividade gamificado: as tarefas da rotina viram a evolução de um personagem de RPG. Concebi e desenvolvi o app com IA (Claude Code) e cuido de toda a divulgação em vídeo, com edição em Remotion e narração com ElevenLabs.</p>
+          <ul class="tags"><li>Claude Code</li><li>Remotion</li><li>ElevenLabs</li><li>Produto</li></ul>
+        </div>
+        <ul class="rail" aria-label="Telas e vídeo do Cronomante">
+          <li><figure><div class="vid"><video src="projetos/cronomante-ep04.mp4" poster="projetos/cronomante-ep04.jpg" preload="none" playsinline width="720" height="1280" aria-label="Vídeo de divulgação do Cronomante"></video><button class="vid-btn" type="button" aria-label="Assistir com som: vídeo de divulgação do Cronomante"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div><figcaption>Vídeo de divulgação</figcaption></figure></li>
+          <li><figure><img src="projetos/cronomante-tela-1.jpg" alt="Tela inicial do Cronomante: personagem Órion no nível 4, barra de XP e missões do dia" width="591" height="1280" loading="lazy"><figcaption>Personagem</figcaption></figure></li>
+          <li><figure><img src="projetos/cronomante-tela-2.jpg" alt="Seleção de personagens do Cronomante: Órion, Brisa e um terceiro em breve" width="591" height="1280" loading="lazy"><figcaption>Personagens</figcaption></figure></li>
+          <li><figure><img src="projetos/cronomante-tela-3.jpg" alt="Estatísticas do Cronomante: radar de atributos como Zelo, Vigor e Laço" width="591" height="1280" loading="lazy"><figcaption>Estatísticas</figcaption></figure></li>
+          <li><figure><img src="projetos/cronomante-tela-4.jpg" alt="Coleção do Cronomante: álbum de cartas ilustradas da temporada Vila Moranda" width="591" height="1280" loading="lazy"><figcaption>Coleção</figcaption></figure></li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="sub">
+      <p class="sub-label mono">(04.2) — Site</p>
+      <article class="proj">
+        <div>
+          <h3 class="long">Site institucional — agência de marketing automotivo</h3>
+          <p>Layout, estrutura e desenvolvimento feitos com IA (Claude). Projeto em fase final, ainda não publicado.</p>
+          <ul class="tags"><li>Claude</li><li>Web design</li><li>Landing page</li></ul>
+        </div>
+        <ul class="shots" aria-label="Capturas do site institucional">
+          <li><figure><a href="sites/agencia-hero.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-hero.webp" alt="Topo do site da agência: título Marketing que vira venda, com o fundador ao lado de carro, caminhão e moto" width="1440" height="900" loading="lazy"></a><figcaption>Topo</figcaption></figure></li>
+          <li><figure><a href="sites/agencia-servicos.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-servicos.webp" alt="Seção de serviços do site da agência: Gestão de Tráfego Pago e Social Media e Conteúdo" width="1440" height="900" loading="lazy"></a><figcaption>Serviços</figcaption></figure></li>
+          <li><figure><a href="sites/agencia-celular.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-celular.webp" alt="Topo do site da agência no celular" width="780" height="1688" decoding="async"></a><figcaption>Celular</figcaption></figure></li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="sub">
+      <p class="sub-label mono">(04.3) — Método</p>
+      <article class="proj-mini">
+        <div>
+          <h3>Eugência</h3>
+          <p>Metodologia própria de posicionamento de marca em 90 dias para prestadores de serviço.</p>
+        </div>
+        <a class="btn" href="https://www.instagram.com/renanbianchi.pro/" target="_blank" rel="noopener">Ver no Instagram
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+      </article>
+    </div>
   </div>
 </section>
 
-<!-- PROJETOS AUTORAIS: mídias na pasta "projetos" do site -->
-<section class="block side" id="projetos">
+<!-- (05) HABILIDADES: índice tipográfico -->
+<section class="ch" id="habilidades" data-ch="05" data-theme="purple" data-label="Habilidades — índice">
   <div class="wrap">
-    <div class="head reveal">
-      <h2>Projetos autorais</h2>
+    <div class="ch-head">
+      <div><span class="ch-num mono">(05) — Habilidades</span><h2>Índice</h2></div>
+      <p class="lead2">Funções, ferramentas e marcas com quem trabalhei.</p>
     </div>
-    <article class="proj reveal">
-      <div>
-        <h3>Cronomante</h3>
-        <p>App de produtividade gamificado: as tarefas da rotina viram a evolução de um personagem de RPG. Concebi e desenvolvi o app com IA (Claude Code) e cuido de toda a divulgação em vídeo, com edição em Remotion e narração com ElevenLabs.</p>
-        <ul class="tags"><li>Claude Code</li><li>Remotion</li><li>ElevenLabs</li><li>Produto</li></ul>
-      </div>
-      <ul class="rail" aria-label="Telas e vídeo do Cronomante">
-        <li><figure><div class="ad-media"><video src="projetos/cronomante-ep04.mp4" poster="projetos/cronomante-ep04.jpg" preload="none" playsinline width="720" height="1280" aria-label="Vídeo de divulgação do Cronomante"></video><button class="ad-play" type="button" aria-label="Reproduzir vídeo de divulgação do Cronomante"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i></button></div><figcaption>Vídeo de divulgação</figcaption></figure></li>
-        <li><figure><img src="projetos/cronomante-tela-1.jpg" alt="Tela inicial do Cronomante: personagem Órion no nível 4, barra de XP e missões do dia" width="591" height="1280" loading="lazy"><figcaption>Personagem</figcaption></figure></li>
-        <li><figure><img src="projetos/cronomante-tela-2.jpg" alt="Seleção de personagens do Cronomante: Órion, Brisa e um terceiro em breve" width="591" height="1280" loading="lazy"><figcaption>Personagens</figcaption></figure></li>
-        <li><figure><img src="projetos/cronomante-tela-3.jpg" alt="Estatísticas do Cronomante: radar de atributos como Zelo, Vigor e Laço" width="591" height="1280" loading="lazy"><figcaption>Estatísticas</figcaption></figure></li>
-        <li><figure><img src="projetos/cronomante-tela-4.jpg" alt="Coleção do Cronomante: álbum de cartas ilustradas da temporada Vila Moranda" width="591" height="1280" loading="lazy"><figcaption>Coleção</figcaption></figure></li>
-      </ul>
-    </article>
-    <article class="proj reveal">
-      <div>
-        <h3 class="long">Site institucional — agência de marketing automotivo</h3>
-        <p>Layout, estrutura e desenvolvimento feitos com IA (Claude). Projeto em fase final, ainda não publicado.</p>
-        <ul class="tags"><li>Claude</li><li>Web design</li><li>Landing page</li></ul>
-      </div>
-      <ul class="shots" aria-label="Capturas do site institucional">
-        <li><figure><a href="sites/agencia-hero.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-hero.webp" alt="Topo do site da agência: título Marketing que vira venda, com o fundador ao lado de carro, caminhão e moto" width="1440" height="900" loading="lazy"></a><figcaption>Topo</figcaption></figure></li>
-        <li><figure><a href="sites/agencia-servicos.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-servicos.webp" alt="Seção de serviços do site da agência: Gestão de Tráfego Pago e Social Media e Conteúdo" width="1440" height="900" loading="lazy"></a><figcaption>Serviços</figcaption></figure></li>
-        <li><figure><a href="sites/agencia-celular.webp" target="_blank" rel="noopener" aria-label="Abrir captura em tamanho real"><img src="sites/agencia-celular.webp" alt="Topo do site da agência no celular" width="780" height="1688" decoding="async"></a><figcaption>Celular</figcaption></figure></li>
-      </ul>
-    </article>
-    <article class="proj-mini reveal">
-      <div>
-        <h3>Eugência</h3>
-        <p>Metodologia própria de posicionamento de marca em 90 dias para prestadores de serviço.</p>
-      </div>
-      <a class="btn" href="https://www.instagram.com/renanbianchi.pro/" target="_blank" rel="noopener">Ver no Instagram
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
-    </article>
+    <div class="idx"><p class="mono">[ Funções ]</p>
+      <ul><li>Roteiro</li><li>Captação</li><li>Edição</li><li>Design</li><li>Copywriting</li><li>Calendário editorial</li><li>Roteiro de anúncios</li><li>Social media</li></ul></div>
+    <div class="idx"><p class="mono">[ Ferramentas ]</p>
+      <ul><li>CapCut</li><li>Remotion</li><li>Photoshop</li><li>Canva</li><li>ChatGPT</li><li>Claude</li><li>Claude Code</li><li>Gemini</li><li>Magnific</li><li>Google Flow</li><li>Dreamina</li><li>ElevenLabs</li></ul></div>
+    <div class="idx"><p class="mono">[ Marcas nos Reels ]</p>
+      <ul><li>Auto Design</li><li>Auto Prosperità</li><li>Aliquantum Suzuki</li><li>Island Motors SJC</li><li>Dr. Roberto Dente</li><li>Dra. Adriana Menezes</li><li>Barella Caminhões</li></ul></div>
   </div>
 </section>
 
-<section class="block" id="sobre">
-  <div class="wrap about">
-    <div class="reveal">
-      <h2><small>Sobre</small>Arte + estratégia</h2>
-      <p>Venho da tatuagem e da música, e levo esse olhar para o conteúdo. Há 4 anos cuido de redes de marcas de vários nichos em uma agência de Santo André, do roteiro à peça final.</p>
-      <p>Uso <strong>IA generativa</strong> no dia a dia para entregar vídeos e peças profissionais com mais velocidade, e roteirizo anúncios que geram <strong>leads qualificados</strong>.</p>
+<!-- (06) SOBRE -->
+<section class="ch" id="sobre" data-ch="06" data-theme="dark" data-label="Sobre — arte + estratégia">
+  <div class="wrap">
+    <div class="ch-head">
+      <div><span class="ch-num mono">(06) — Sobre</span><h2>Arte + estratégia</h2></div>
     </div>
-    <div class="skills">
-      <div class="skill reveal"><h3>Vídeo</h3><ul class="tags"><li>Roteiro</li><li>Captação</li><li>Edição</li><li>CapCut</li><li>Remotion</li></ul></div>
-      <div class="skill reveal" style="--d:.06s"><h3>Design</h3><ul class="tags"><li>Photoshop</li><li>Carrosséis</li><li>Feed e stories</li><li>Canva</li></ul></div>
-      <div class="skill reveal" style="--d:.12s"><h3>Conteúdo</h3><ul class="tags"><li>Social media</li><li>Copywriting</li><li>Calendário editorial</li><li>Roteiro de anúncios</li></ul></div>
-      <div class="skill reveal" style="--d:.18s"><h3>IA generativa</h3><ul class="tags"><li>ChatGPT</li><li>Claude</li><li>Gemini</li><li>Magnific</li><li>Google Flow</li><li>Dreamina</li><li>ElevenLabs</li></ul></div>
+    <div class="about">
+      <div>
+        <p>Venho da tatuagem e da música, e levo esse olhar para o conteúdo. Há 4 anos cuido de redes de marcas de vários nichos em uma agência de Santo André, do roteiro à peça final.</p>
+        <p>Uso <strong>IA generativa</strong> no dia a dia para entregar vídeos e peças profissionais com mais velocidade, e roteirizo anúncios que geram <strong>leads qualificados</strong>.</p>
+      </div>
+      <ul class="facts">
+        <li><span class="mono">[ Tatuagem ]</span><span>O olhar de desenho e composição.</span></li>
+        <li><span class="mono">[ Música ]</span><span>Ritmo, corte e tempo na edição.</span></li>
+        <li><span class="mono">[ Agência ]</span><span>4 anos atendendo marcas de vários nichos.</span></li>
+        <li><span class="mono">[ IA ]</span><span>Vídeos e peças com mais velocidade.</span></li>
+      </ul>
     </div>
   </div>
 </section>
 
-<section class="contact" id="contato">
-  <div class="wrap reveal">
+<!-- (07) RENAN -->
+<section class="ch ch-name" id="renan" data-ch="07" data-theme="purple" data-label="Renan — assinatura">
+  <div class="wrap">
+    <span class="ch-num mono">(07) — Assinatura</span>
+    <p class="big-name" aria-label="Renan">Renan</p>
+    <p class="closing">Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só.</p>
+  </div>
+</section>
+
+<!-- (08) CONTATO & CRÉDITOS -->
+<section class="ch contact" id="contato" data-ch="08" data-theme="dark" data-label="Contato — 1 clique">
+  <div class="wrap">
+    <span class="ch-num mono">(08) — Contato &amp; créditos</span>
     <h2>Bora conversar?</h2>
-    <p>Disponível para vagas na região do ABC paulista e em formato remoto.</p>
+    <p class="avail">Disponível para vagas na região do ABC paulista e em formato remoto.</p>
     <div class="cta">
       <a class="btn primary" href="https://wa.me/5511997468837" target="_blank" rel="noopener">WhatsApp</a>
       <a class="btn" href="mailto:renan.10999@gmail.com">E-mail</a>
       <a class="btn" href="https://www.linkedin.com/in/renan-bianchi-8ba70a176" target="_blank" rel="noopener">LinkedIn</a>
       <a class="btn" href="https://www.instagram.com/renanbianchi.pro/" target="_blank" rel="noopener">Instagram</a>
+      <a class="btn" href="curriculo/Curriculo-Renan-Bianchi.pdf" download>Baixar currículo (PDF)
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg></a>
     </div>
-    <p class="contact-lines"><a href="tel:+5511997468837">(11) 99746-8837</a><span aria-hidden="true">·</span><a href="mailto:renan.10999@gmail.com">renan.10999@gmail.com</a></p>
+    <p class="contact-lines"><a href="tel:+5511997468837">(11) 99746-8837</a><a href="mailto:renan.10999@gmail.com">renan.10999@gmail.com</a></p>
+
+    <div class="credits">
+      <div><h3 class="mono">[ Canais ]</h3>
+        <ul><li><a href="https://wa.me/5511997468837" target="_blank" rel="noopener">WhatsApp</a></li><li><a href="mailto:renan.10999@gmail.com">E-mail</a></li><li><a href="https://www.linkedin.com/in/renan-bianchi-8ba70a176" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="https://www.instagram.com/renanbianchi.pro/" target="_blank" rel="noopener">Instagram</a></li><li><a href="curriculo/Curriculo-Renan-Bianchi.pdf" download>Currículo (PDF)</a></li></ul></div>
+      <div><h3 class="mono">[ Ferramentas ]</h3>
+        <ul><li>CapCut · Remotion</li><li>Photoshop · Canva</li><li>ChatGPT · Claude · Gemini</li><li>Magnific · Google Flow · Dreamina</li><li>ElevenLabs</li></ul></div>
+      <div><h3 class="mono">[ Créditos / Stack ]</h3>
+        <ul><li>Roteiro, design e código: Renan Bianchi, com Claude Code</li><li>Tipografia: Anton, Manrope, JetBrains Mono</li><li>HTML, CSS e JavaScript, sem frameworks</li><li>Hospedagem: GitHub Pages</li></ul></div>
+    </div>
+    <div class="end">
+      <div class="cta">
+        <a class="btn" href="#topo">Voltar ao início
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></a>
+        <button class="btn" type="button" id="share">Compartilhar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v14"/></svg></button>
+      </div>
+      <small>© Renan Bianchi · Mauá/SP</small>
+    </div>
   </div>
 </section>
 </main>
 
-<footer>© Renan Bianchi · Mauá/SP</footer>
-
 <script>
 (function(){
-  // Pausa a animação do fundo do topo quando ele sai da tela (economiza bateria)
-  var hero = document.querySelector('.hero');
-  if ('IntersectionObserver' in window && hero){
-    new IntersectionObserver(function(en){ hero.classList.toggle('off', !en[0].isIntersecting); }).observe(hero);
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var body = document.body;
+  var chapters = [].slice.call(document.querySelectorAll('[data-ch]'));
+  var total = chapters.length - 1;
+  var hudNum = document.getElementById('hudNum'), hudLabel = document.getElementById('hudLabel');
+  var hudCount = document.getElementById('hudCount'), hudBar = document.getElementById('hudBar');
+  var menuLinks = [].slice.call(document.querySelectorAll('.menu ol a'));
+  var metaTheme = document.querySelector('meta[name="theme-color"]');
+
+  // Capítulo ativo = o que cruza o meio da tela: troca cor, status do HUD e índice
+  function setActive(sec){
+    var n = sec.getAttribute('data-ch'), theme = sec.getAttribute('data-theme');
+    if (theme === 'purple') body.setAttribute('data-theme', 'purple'); else body.removeAttribute('data-theme');
+    metaTheme.setAttribute('content', theme === 'purple' ? '#8b5cf6' : '#0a090e');
+    hudNum.textContent = '(' + n + ')';
+    hudLabel.textContent = sec.getAttribute('data-label');
+    hudCount.textContent = n + ' / ' + ('0' + total).slice(-2);
+    hudBar.style.transform = 'scaleX(' + (parseInt(n, 10) / total) + ')';
+    menuLinks.forEach(function(a){ a.setAttribute('aria-current', a.getAttribute('data-to') === n ? 'true' : 'false'); });
+  }
+  if ('IntersectionObserver' in window){
+    var cio = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting) setActive(e.target); });
+    }, {rootMargin:'-50% 0px -50% 0px'});
+    chapters.forEach(function(s){ cio.observe(s); });
   }
 
-  // Entrada suave das seções
-  var els = document.querySelectorAll('.reveal');
-  if (!('IntersectionObserver' in window)) { els.forEach(function(e){e.classList.add('in')}); }
-  else {
-    var ro = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); ro.unobserve(e.target); } });
-    }, {rootMargin:'0px 0px -8% 0px', threshold:.08});
-    els.forEach(function(e){
-      ro.observe(e);
-      // terminada a entrada, devolve o hover normal do card
-      e.addEventListener('transitionend', function done(ev){
-        if (ev.target === e && ev.propertyName === 'transform'){ e.classList.remove('reveal','in'); e.removeEventListener('transitionend', done); }
+  // Números contam ao entrar na tela
+  var counts = document.querySelectorAll('.count');
+  function runCount(el){
+    var to = +el.getAttribute('data-to'), suf = el.getAttribute('data-suffix') || '';
+    var t0 = null, dur = 1400;
+    function frame(t){
+      if (!t0) t0 = t;
+      var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 4);
+      el.innerHTML = Math.round(to * e) + (suf ? '<i>' + suf + '</i>' : '');
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  if (!reduce && 'IntersectionObserver' in window){
+    var nio = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting){ runCount(e.target); nio.unobserve(e.target); } });
+    }, {threshold:.6});
+    counts.forEach(function(c){ nio.observe(c); });
+  }
+
+  // Visual do play pausa fora da tela
+  var visual = document.querySelector('.visual');
+  if (visual && 'IntersectionObserver' in window){
+    new IntersectionObserver(function(es){ visual.classList.toggle('off', !es[0].isIntersecting); }).observe(visual);
+  }
+
+  // Índice (pular para)
+  var menu = document.getElementById('menu'), menuBtn = document.querySelector('.hud-menu');
+  var closeBtn = menu.querySelector('.menu-close');
+  function openMenu(){ menu.classList.add('open'); menuBtn.setAttribute('aria-expanded','true'); document.documentElement.style.overflow='hidden'; (menu.querySelector('a[aria-current="true"]') || menuLinks[0]).focus(); }
+  function closeMenu(focusBtn){ menu.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); document.documentElement.style.overflow=''; if (focusBtn) menuBtn.focus(); }
+  menuBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', function(){ closeMenu(true); });
+  menu.addEventListener('click', function(e){ if (e.target.closest('a')) closeMenu(false); });
+  document.addEventListener('keydown', function(e){
+    if (!menu.classList.contains('open')) return;
+    if (e.key === 'Escape') closeMenu(true);
+    if (e.key === 'Tab'){
+      var f = menu.querySelectorAll('a,button'), first = f[0], last = f[f.length-1];
+      if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Vídeos nativos: prévia muda no hover (desktop); clique/toque abre em tela cheia com som
+  var canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var boxes = [].slice.call(document.querySelectorAll('.vid'));
+  function reset(box){ var v = box.querySelector('video'); v.pause(); v.controls = false; v.muted = true; box.classList.remove('full','preview'); }
+  function openFull(box){
+    boxes.forEach(function(b){ if (b !== box) reset(b); });
+    var v = box.querySelector('video');
+    v.muted = false; v.controls = true; box.classList.remove('preview'); box.classList.add('full');
+    var p = v.play(); if (p && p.catch) p.catch(function(){});
+    if (v.requestFullscreen) v.requestFullscreen().catch(function(){});
+    else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+  }
+  boxes.forEach(function(box){
+    var v = box.querySelector('video');
+    box.querySelector('.vid-btn').addEventListener('click', function(){ openFull(box); });
+    v.addEventListener('webkitendfullscreen', function(){ reset(box); });
+    if (canHover){
+      box.addEventListener('mouseenter', function(){
+        if (box.classList.contains('full')) return;
+        v.muted = true; v.preload = 'auto'; box.classList.add('preview');
+        var p = v.play(); if (p && p.catch) p.catch(function(){});
       });
-    });
-  }
-
-  // Anúncios: o vídeo só baixa quando a pessoa aperta o play; um toca por vez.
-  var adVideos = document.querySelectorAll('.ad-media video');
-  document.querySelectorAll('.ad-play').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var box = btn.parentNode, v = box.querySelector('video');
-      v.controls = true;
-      box.classList.add('playing');
-      var p = v.play(); if (p && p.catch) p.catch(function(){});
-    });
+      box.addEventListener('mouseleave', function(){ if (!box.classList.contains('full')) { v.pause(); box.classList.remove('preview'); } });
+    }
   });
-  adVideos.forEach(function(v){
-    v.addEventListener('play', function(){
-      v.parentNode.classList.add('playing'); v.controls = true;
-      adVideos.forEach(function(o){ if (o !== v && !o.paused) o.pause(); });
-    });
+  document.addEventListener('fullscreenchange', function(){
+    if (!document.fullscreenElement) boxes.forEach(function(b){ if (b.classList.contains('full')) reset(b); });
   });
 
-  // Reels: cada vídeo do Instagram só carrega quando chega perto da tela (página mais leve).
-  // Sem o embed.js: o próprio iframe do Instagram avisa a altura e o vídeo aparece por cima da capa.
-  // Se o Instagram não carregar, a capa roxa com o link continua no lugar.
-  var quotes = document.querySelectorAll('blockquote.ig');
-  var frames = [];
+  // Compartilhar (Web Share API; sem ela, copia o link)
+  var share = document.getElementById('share');
+  share.addEventListener('click', function(){
+    var data = {title: document.title, url: 'https://saleensick.github.io/renan-bianchi/'};
+    if (navigator.share) { navigator.share(data).catch(function(){}); return; }
+    var label = share.firstChild;
+    function done(t){ label.nodeValue = t; setTimeout(function(){ label.nodeValue = 'Compartilhar'; }, 2200); }
+    if (navigator.clipboard) navigator.clipboard.writeText(data.url).then(function(){ done('Link copiado '); }, function(){ done('Copie: ' + data.url + ' '); });
+    else done('Copie: ' + data.url + ' ');
+  });
+
+  // Reels: o iframe do Instagram só carrega perto da tela e avisa a própria altura
+  var quotes = document.querySelectorAll('blockquote.ig'), frames = [];
   function mount(q){
     var f = document.createElement('iframe');
-    f.className = 'ig-frame';
-    f.src = q.getAttribute('data-instgrm-permalink') + 'embed/';
-    f.title = 'Reel no Instagram';
-    f.setAttribute('scrolling', 'no');
-    f.setAttribute('allowfullscreen', '');
+    f.className = 'ig-frame'; f.src = q.getAttribute('data-instgrm-permalink') + 'embed/';
+    f.title = 'Reel no Instagram'; f.setAttribute('scrolling','no'); f.setAttribute('allowfullscreen','');
     f.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write';
-    q.appendChild(f);
-    frames.push([f, q]);
+    q.appendChild(f); frames.push([f, q]);
   }
   window.addEventListener('message', function(e){
     if (e.origin !== 'https://www.instagram.com') return;
     var d; try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch(err){ return; }
     if (!d || d.type !== 'MEASURE' || !d.details || !(d.details.height > 0)) return;
     for (var i = 0; i < frames.length; i++){
-      if (frames[i][0].contentWindow === e.source){
-        frames[i][1].style.setProperty('--h', d.details.height + 'px');
-        frames[i][1].classList.add('ready');
-        break;
-      }
+      if (frames[i][0].contentWindow === e.source){ frames[i][1].style.setProperty('--h', d.details.height + 'px'); frames[i][1].classList.add('ready'); break; }
     }
   });
   if (!('IntersectionObserver' in window)) { quotes.forEach(mount); return; }
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){ if (e.isIntersecting){ mount(e.target); io.unobserve(e.target); } });
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ mount(e.target); io.unobserve(e.target); } });
   }, {rootMargin:'900px 0px'});
   quotes.forEach(function(q){ io.observe(q); });
 })();
