@@ -40,7 +40,7 @@
     --mono:'JetBrains Mono',ui-monospace,monospace;
   }
 
-  /* TEMA POR CAPÍTULO: cada tela usa fundo + uma cor; fundo e texto trocam em ~600 ms */
+  /* TEMA POR CAPÍTULO: cada tela usa fundo + uma cor */
   body{
     --c-bg:var(--bg); --c-fg:var(--text); --c-mut:var(--muted); --c-line:var(--line);
     --c-acc:var(--purple); --c-btn:var(--purple-btn); --c-btn-fg:#fff;
@@ -51,12 +51,12 @@
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;scroll-padding-top:72px;scrollbar-color:var(--line-2) var(--bg)}
+  html{scroll-behavior:smooth;scroll-padding-top:64px;scrollbar-color:var(--line-2) var(--bg)}
   body{
     background:var(--c-bg);color:var(--c-fg);
     font-family:'Manrope',system-ui,sans-serif;font-size:17px;line-height:1.6;
     -webkit-font-smoothing:antialiased;caret-color:var(--c-acc);overflow-x:hidden;
-    transition:background-color .6s var(--ease),color .6s var(--ease);
+    transition:background-color .6s var(--ease),color .5s var(--ease);
   }
   .hud,.hud-foot > *{transition:background-color .6s var(--ease),border-color .6s var(--ease)}
   ::selection{background:var(--c-fg);color:var(--c-bg)}
@@ -66,11 +66,13 @@
   a{color:inherit;text-underline-offset:.2em}
   :focus-visible{outline:2px solid var(--c-fg);outline-offset:3px;border-radius:6px}
   svg{display:block}
-  main{overflow-x:clip}
+  main{position:relative;z-index:1;overflow-x:clip}
   .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
   .mono{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
   .skip{position:absolute;left:16px;top:-60px;z-index:60;background:var(--purple-btn);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;text-decoration:none;transition:top .2s}
   .skip:focus{top:12px}
+  .defs{position:absolute;width:0;height:0;overflow:hidden}
+  #ht circle{fill:var(--c-acc);transition:fill .5s var(--ease)}
 
   /* BOTÕES */
   .btn{
@@ -102,8 +104,7 @@
   .hud-right{display:flex;align-items:center;gap:10px;justify-self:end}
   .hud-menu{
     display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;
-    background:transparent;color:var(--c-fg);border:1px solid var(--c-line);cursor:pointer;
-    transition:border-color .25s;
+    background:transparent;color:var(--c-fg);border:1px solid var(--c-line);cursor:pointer;transition:border-color .25s;
   }
   .hud-menu:hover{border-color:var(--c-fg)}
   .hud-menu i{display:grid;gap:4px;width:14px}
@@ -144,62 +145,109 @@
   .menu-foot .btn{color:var(--text);border-color:var(--line-2)}
   .menu-foot .btn.primary{background:var(--purple-btn);border-color:var(--purple-btn);color:#fff}
 
-  /* CAPÍTULOS */
-  .ch{position:relative;min-height:100svh;padding:136px 0 128px}
-  .ch-head{
-    position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);align-items:end;gap:20px 48px;
-    padding-bottom:28px;margin-bottom:56px;border-bottom:1px solid var(--c-line);
+  /* TRANSIÇÃO: o ▶ cresce e abre o próximo capítulo */
+  .iris{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;visibility:hidden}
+  .iris polygon{transform-box:view-box;transform-origin:48px 50px;transform:scale(0)}
+  .iris.go{visibility:visible}
+  .iris.go polygon{animation:iris .8s var(--ease) forwards}
+  @keyframes iris{from{transform:scale(0) rotate(-24deg)}to{transform:scale(5.2) rotate(0)}}
+
+  /* CENAS: cada capítulo abre com uma cena de tela cheia que fica presa enquanto você rola */
+  .ch{position:relative}
+  .scene-wrap{position:relative;height:calc(var(--len,150) * 1svh)}
+  .scene{
+    position:sticky;top:0;height:100svh;overflow:hidden;
+    display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 1fr auto;gap:12px 40px;
+    max-width:1440px;margin:0 auto;padding:96px 40px 108px;
   }
-  .ch-head::before,.ch-head::after{content:"+";position:absolute;bottom:-11px;font:400 16px/1 var(--mono);color:var(--c-fg)}
-  .ch-head::before{left:-5px}
-  .ch-head::after{right:-5px}
-  .ch-num{display:block;margin-bottom:14px;color:var(--c-mut)}
-  h2{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(56px,9vw,132px);line-height:.92;letter-spacing:.005em;padding-top:.14em}
-  .ch-head p.lead2{color:var(--c-mut);text-wrap:pretty}
-  .brk{display:flex;flex-wrap:wrap;align-items:center;gap:8px 0;margin-top:18px}
-  .brk span{white-space:nowrap}
-  .brk i{display:block;width:28px;height:1px;background:var(--c-fg);margin:0 10px;opacity:.6}
+  .sc-top{grid-column:1;grid-row:1;max-width:440px;position:relative;z-index:2}
+  .sc-top .ch-num{display:block;margin-bottom:14px;color:var(--c-mut)}
+  .sc-top p{color:var(--c-mut);text-wrap:pretty}
+  .sc-title{grid-column:1 / -1;grid-row:3;align-self:end;position:relative;z-index:2;pointer-events:none}
+  .sc-note{grid-column:2;grid-row:3;align-self:end;justify-self:end;text-align:right;position:relative;z-index:2;color:var(--c-mut);max-width:260px}
+  h2,.big{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;line-height:.86;letter-spacing:.005em}
+  h2{font-size:clamp(80px,12.5vw,196px);padding-top:.12em}
+  h2.long{font-size:clamp(56px,9.4vw,150px);line-height:.9}
+
+  /* FIGURA em retícula, com quadro de laboratório e cabeça de leitura (playhead) */
+  .fig{
+    position:absolute;left:var(--fx,58%);top:52%;z-index:1;width:min(64svh,48vw);aspect-ratio:1;
+    transform:translate(-50%,-50%) scale(calc(.9 + var(--p,0) * .12));
+  }
+  .fig svg{width:100%;height:100%;overflow:visible}
+  .fig .fl,.fig .ln{fill:none;stroke:var(--c-acc);stroke-width:1.4;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round;transition:stroke .5s var(--ease)}
+  .fig .ln{stroke:var(--c-fg);stroke-width:1;opacity:.7}
+  .fig .dot{fill:var(--c-fg)}
+  .fig .ring{transform-box:view-box;transform-origin:50% 50%;transform:rotate(calc(var(--p,0) * 220deg))}
+  .fig .ring text{font:500 3.3px var(--mono);letter-spacing:.7px;fill:var(--c-fg);text-transform:uppercase}
+  .lab{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;padding:3px 6px;background:var(--c-bg);color:var(--c-fg);transition:background-color .6s var(--ease)}
+  .cx{position:absolute;width:14px;height:14px;font-style:normal}
+  .cx::before,.cx::after{content:"";position:absolute;background:var(--c-fg)}
+  .cx::before{left:6.5px;top:0;width:1px;height:14px}
+  .cx::after{top:6.5px;left:0;height:1px;width:14px}
+  .cx.tl{left:-9%;top:-9%}.cx.tr{right:-9%;top:-9%}.cx.bl{left:-9%;bottom:-9%}.cx.br{right:-9%;bottom:-9%}
+  .ph{position:absolute;top:-6%;bottom:-6%;left:calc(var(--p,0) * 100%);width:1px;background:var(--c-fg);opacity:.75;font-style:normal}
+  .ph b{position:absolute;top:-4px;left:8px;transform:translateY(-100%);white-space:nowrap;font-size:11px}
+  .fig figcaption{position:absolute;left:-9%;bottom:-9%;transform:translateY(calc(100% + 8px));white-space:nowrap;color:var(--c-mut)}
 
   /* (00) PLAY */
-  .ch-play{display:flex;align-items:center;padding:112px 0 96px}
-  .play-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:center;gap:48px}
-  .ch-play .ch-num{margin-bottom:22px}
-  h1{
-    font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(68px,11vw,156px);
-    line-height:.9;letter-spacing:.01em;text-transform:uppercase;
-  }
+  .ch-play .scene{grid-template-columns:minmax(0,1fr)}
+  .ch-play .fig{--fx:71%;width:min(60svh,38vw)}
+  .ch-play .sc-top{max-width:520px}
+  h1{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(76px,11vw,176px);line-height:.88;letter-spacing:.01em;text-transform:uppercase}
   h1 .line{display:block;overflow:hidden;padding-bottom:.04em}
   h1 .line > span{display:inline-block}
   h1 em{font-style:normal;color:var(--c-acc)}
-  .role{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:30px;font-size:clamp(17px,1.6vw,21px);font-weight:700}
+  .sc-top .role{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:clamp(17px,1.5vw,20px);font-weight:700;color:var(--c-fg)}
   .role span:not(:last-child)::after{content:"";display:inline-block;width:6px;height:6px;margin-left:14px;border-radius:50%;background:var(--c-acc);vertical-align:.18em}
-  .lead{max-width:560px;margin-top:16px;font-size:19px;line-height:1.55;color:var(--c-mut);text-wrap:pretty}
+  .lead{margin-top:14px;font-size:18px;line-height:1.55;color:var(--c-mut);text-wrap:pretty}
   .lead strong{color:var(--c-fg)}
-  .ch-play .cta{margin-top:36px}
-  .visual{position:relative;color:var(--c-fg)}
-  .visual svg{width:100%;height:auto;overflow:visible}
-  .visual .tri-dots{transform-origin:45% 50%}
-  .visual text{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.08em;fill:currentColor}
+  .ch-play .cta{margin-top:26px}
 
-  /* (01) NÚMEROS */
-  .stat{
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);align-items:end;gap:16px 40px;
-    min-height:58svh;padding:48px 0 36px;border-bottom:1px solid var(--c-line);
+  /* (01) NÚMEROS: um número por vez enquanto a cena está presa */
+  .stats{grid-column:1 / -1;grid-row:3;position:relative;z-index:2;list-style:none}
+  .st{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);align-items:end;gap:16px 40px}
+  .js .st{position:absolute;inset:auto 0 0 0;opacity:0;transform:translateY(18%);transition:opacity .5s var(--ease),transform .7s var(--ease)}
+  .js .st:first-child{position:relative}
+  .js .st.on{opacity:1;transform:none}
+  .st b{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(140px,21vw,320px);line-height:.8;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .st b i{font-style:normal}
+  .st p{font-size:20px;line-height:1.35;font-weight:700}
+  .st p .mono{display:block;font-size:12px;margin-bottom:10px;font-weight:500}
+  .steps{display:flex;gap:6px;margin-top:16px}
+  .steps i{display:block;width:22px;height:3px;background:var(--c-line);transition:background-color .4s}
+  .steps i.on{background:var(--c-fg)}
+
+  /* CONTEÚDO depois da cena */
+  .after{padding:24px 0 140px}
+  .after-head{display:flex;align-items:center;gap:12px;margin-bottom:22px;color:var(--c-mut)}
+  .after-head::after{content:"";flex:1;height:1px;background:var(--c-line)}
+
+  /* ESTEIRAS de vídeo (rolagem lateral) */
+  .belt-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .belt-count{color:var(--c-mut);font-variant-numeric:tabular-nums}
+  .belt-nav{display:flex;gap:8px}
+  .belt-nav button{width:48px;height:48px;border-radius:50%;border:1px solid var(--c-line);background:transparent;color:var(--c-fg);display:grid;place-items:center;cursor:pointer;transition:border-color .25s,opacity .25s,transform .35s var(--ease)}
+  .belt-nav button:hover:not(:disabled){border-color:var(--c-fg);transform:translateY(-2px)}
+  .belt-nav button:disabled{opacity:.3;cursor:default}
+  .belt-nav svg{width:18px;height:18px}
+  .belt{
+    display:grid;grid-auto-flow:column;grid-auto-columns:clamp(250px,23vw,310px);gap:20px;align-items:start;list-style:none;
+    overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:32px;
+    /* sangra até a borda direita da tela; à esquerda segue a coluna do texto */
+    margin:0 calc((100% - 100vw) / 2 + 6px) 0 -32px;padding:6px 32px 20px;scrollbar-width:thin;scrollbar-color:var(--c-line) transparent;
   }
-  .stat:first-of-type{border-top:1px solid var(--c-line)}
-  .stat b{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(132px,27vw,380px);line-height:.8;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-  .stat b i{font-style:normal}
-  .stat p{font-size:20px;line-height:1.35;font-weight:700}
-  .stat p .mono{display:block;font-size:12px;margin-bottom:10px;font-weight:500}
+  .belt > li{scroll-snap-align:start}
+  .belt::-webkit-scrollbar{height:6px}
+  .belt::-webkit-scrollbar-track{background:transparent}
+  .belt::-webkit-scrollbar-thumb{background:var(--c-line);border:0}
 
-  /* GRADES DE VÍDEO */
-  .reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:28px 24px;align-items:start;list-style:none}
   .card{
     padding:10px;border-radius:var(--radius);border:1px solid var(--c-line);
     background:color-mix(in srgb,var(--c-fg) 4%,transparent);
-    transition:border-color .35s,transform .5s var(--ease),box-shadow .5s var(--ease);
+    transition:border-color .35s,transform .5s var(--ease);
   }
-  .card:hover{border-color:var(--c-fg);transform:translateY(-4px);box-shadow:0 28px 48px -26px rgba(0,0,0,.85)}
+  .card:hover{border-color:var(--c-fg);transform:translateY(-4px)}
   .cap{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;padding:14px 8px 6px;font-size:14px;line-height:1.4}
   .cap b{font-weight:700}
   .cap span{color:var(--c-mut)}
@@ -235,11 +283,22 @@
   .vid.preview .vid-btn .mono{opacity:1;transform:none}
   .vid.full .vid-btn{opacity:0;pointer-events:none}
 
+  /* TOGGLE ORGÂNICO / ANÚNCIO (aparece nos capítulos 02 e 03) */
+  .kind{
+    position:fixed;top:76px;left:50%;z-index:38;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:999px;
+    background:color-mix(in srgb,var(--c-bg) 86%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border:1px solid var(--c-line);opacity:0;visibility:hidden;transform:translate(-50%,-10px);
+    transition:opacity .4s var(--ease),transform .6s var(--ease),visibility 0s .4s,background-color .6s var(--ease),border-color .6s var(--ease);
+  }
+  .kind.on{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .4s var(--ease),transform .6s var(--ease),background-color .6s var(--ease),border-color .6s var(--ease)}
+  .kind a{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:38px;padding:0 18px;border-radius:999px;text-decoration:none;color:var(--c-fg);transition:color .5s var(--ease)}
+  .kind a b{font:400 19px/1 'Anton',sans-serif;letter-spacing:.02em}
+  .kind a[aria-current="true"]{color:var(--c-btn-fg)}
+  .kind i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:var(--c-btn);transition:transform .6s var(--ease),background-color .6s var(--ease)}
+  .kind[data-k="03"] i{transform:translateX(100%)}
+
   /* (04) PROJETOS */
-  .sub{padding-top:8px}
   .sub + .sub{margin-top:56px}
-  .sub-label{display:flex;align-items:center;gap:12px;margin-bottom:18px;color:var(--c-mut)}
-  .sub-label::after{content:"";flex:1;height:1px;background:var(--c-line)}
   .proj{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center;padding:28px;border:1px solid var(--c-line);border-radius:var(--radius);background:color-mix(in srgb,var(--c-fg) 4%,transparent)}
   .proj h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;line-height:1;font-size:clamp(32px,3.4vw,46px);margin-bottom:16px}
   .proj h3.long{font-size:clamp(26px,2.6vw,34px);line-height:1.05;text-wrap:balance}
@@ -276,66 +335,7 @@
     .idx ul li:hover{opacity:1}
   }
 
-  /* (06) SOBRE */
-  .about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px 72px;align-items:start}
-  .about p{color:var(--c-mut);max-width:56ch;text-wrap:pretty;font-size:19px}
-  .about p + p{margin-top:18px}
-  .about p strong{color:var(--c-fg)}
-  .facts{list-style:none;border-top:1px solid var(--c-line)}
-  .facts li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--c-line)}
-  .facts li .mono{padding-top:4px}
-
-  /* (07) RENAN */
-  .ch-name{display:flex;flex-direction:column;justify-content:center}
-  .big-name{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(110px,27vw,400px);line-height:.82;letter-spacing:-.005em;margin:12px 0 36px}
-  .closing{font-size:clamp(22px,2.6vw,34px);line-height:1.25;font-weight:700;max-width:24ch;text-wrap:balance}
-
-  /* (08) CONTATO & CRÉDITOS */
-  .contact h2{font-size:clamp(60px,10vw,140px)}
-  .contact .avail{color:var(--c-mut);margin:18px 0 32px;max-width:520px;font-size:19px}
-  .contact-lines{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:28px;font-variant-numeric:tabular-nums}
-  .contact-lines a{text-decoration:none}
-  .contact-lines a:hover{text-decoration:underline}
-  .credits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:96px;padding-top:28px;border-top:1px solid var(--c-line)}
-  .credits h3{margin-bottom:14px;color:var(--c-mut)}
-  .credits ul{list-style:none;display:grid;gap:6px;font-size:15px}
-  .credits a{text-decoration:none}
-  .credits a:hover{text-decoration:underline}
-  .end{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--c-line)}
-  .end .cta .btn{min-height:44px;padding:10px 20px;font-size:14px}
-  .end small{color:var(--c-mut);font-size:13px}
-
-  /* V2 · PARTÍCULAS: um canvas fixo atrás do conteúdo; cada capítulo tem um "slot" onde os pontos formam a figura */
-  .px{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity .9s var(--ease)}
-  .px.on{opacity:1}
-  main{position:relative;z-index:1}
-  .px-slot{display:none}
-  .js .px-slot{display:block;width:min(220px,100%);aspect-ratio:1;pointer-events:none}
-  .ch-aside{display:grid;gap:0;justify-items:end;align-content:end}
-  .js .ch-aside .px-slot{margin:44px 36px 48px 0}
-  .ch-aside .lead2{justify-self:stretch}
-  .idx-wrap{position:relative}
-  .ch-name .wrap{position:relative}
-  .js .px-behind{position:absolute;right:0;top:50%;width:min(560px,82%);transform:translateY(-50%)}
-  .js .ch-name .px-behind{width:min(540px,56%)}
-  .visual .tri-fill{transition:opacity .9s var(--ease)}
-  .px-on .visual .tri-fill{opacity:0}
-
-  /* V2 · TOGGLE ORGÂNICO / ANÚNCIO (aparece nos capítulos 02 e 03) */
-  .kind{
-    position:fixed;top:76px;left:50%;z-index:38;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:999px;
-    background:color-mix(in srgb,var(--c-bg) 86%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-    border:1px solid var(--c-line);opacity:0;visibility:hidden;transform:translate(-50%,-10px);
-    transition:opacity .4s var(--ease),transform .6s var(--ease),visibility 0s .4s,background-color .6s var(--ease),border-color .6s var(--ease);
-  }
-  .kind.on{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .4s var(--ease),transform .6s var(--ease),background-color .6s var(--ease),border-color .6s var(--ease)}
-  .kind a{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:38px;padding:0 18px;border-radius:999px;text-decoration:none;color:var(--c-fg);transition:color .5s var(--ease)}
-  .kind a b{font:400 19px/1 'Anton',sans-serif;letter-spacing:.02em}
-  .kind a[aria-current="true"]{color:var(--c-btn-fg)}
-  .kind i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:var(--c-btn);transition:transform .6s var(--ease),background-color .6s var(--ease)}
-  .kind[data-k="03"] i{transform:translateX(100%)}
-
-  /* V2 · MONTE SEU TIME */
+  /* MONTE SEU TIME */
   .team{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px 56px;align-items:end;margin-top:104px;padding-top:28px;border-top:1px solid var(--c-line)}
   .team h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(44px,6vw,88px);line-height:.92;margin:14px 0 16px}
   .team-q{font-size:19px;font-weight:700}
@@ -356,39 +356,77 @@
   .team-out .mono{display:block;margin-bottom:10px;font-weight:500}
   @keyframes bump{30%{transform:translateY(-7%) scale(1.04)}}
 
+  /* (06) SOBRE */
+  .about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px 72px;align-items:start}
+  .about p{color:var(--c-mut);max-width:56ch;text-wrap:pretty;font-size:19px}
+  .about p + p{margin-top:18px}
+  .about p strong{color:var(--c-fg)}
+  .facts{list-style:none;border-top:1px solid var(--c-line)}
+  .facts li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--c-line)}
+  .facts li .mono{padding-top:4px}
+
+  /* (07) RENAN */
+  .ch-name .fig{--fx:62%}
+  .big-name{font-size:clamp(130px,27vw,420px);line-height:.8}
+  .closing{font-size:clamp(20px,2.2vw,30px);line-height:1.25;font-weight:700;color:var(--c-fg)!important;text-wrap:balance}
+
+  /* (08) CONTATO & CRÉDITOS */
+  .contact{padding:136px 0 120px}
+  .contact .ch-num{display:block;margin-bottom:14px;color:var(--c-mut)}
+  .contact h2{font-size:clamp(60px,10vw,140px)}
+  .contact .avail{color:var(--c-mut);margin:18px 0 32px;max-width:520px;font-size:19px}
+  .contact-lines{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:28px;font-variant-numeric:tabular-nums}
+  .contact-lines a{text-decoration:none}
+  .contact-lines a:hover{text-decoration:underline}
+  .credits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:96px;padding-top:28px;border-top:1px solid var(--c-line)}
+  .credits h3{margin-bottom:14px;color:var(--c-mut)}
+  .credits ul{list-style:none;display:grid;gap:6px;font-size:15px}
+  .credits a{text-decoration:none}
+  .credits a:hover{text-decoration:underline}
+  .end{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--c-line)}
+  .end .cta .btn{min-height:44px;padding:10px 20px;font-size:14px}
+  .end small{color:var(--c-mut);font-size:13px}
+
   /* MOVIMENTO */
   @media (prefers-reduced-motion:no-preference){
-    .js h1 .line > span{animation:rise 1.1s var(--ease) both}
-    .js h1 .line:nth-child(2) > span{animation-delay:.12s}
-    .js .ch-play .role,.js .ch-play .lead,.js .ch-play .cta{animation:fade .9s var(--ease) both}
-    .js .ch-play .role{animation-delay:.3s}
-    .js .ch-play .lead{animation-delay:.4s}
-    .js .ch-play .cta{animation-delay:.5s}
-    .visual .tri-dots{animation:breathe 5s var(--ease) infinite alternate}
-    .visual.off .tri-dots{animation-play-state:paused}
+    .js .ch-play .sc-top .cta{animation:fade .9s var(--ease) .3s both}
   }
   @keyframes rise{from{transform:translateY(105%)}to{transform:none}}
   @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  @keyframes breathe{from{transform:scale(.96);opacity:.75}to{transform:scale(1.02);opacity:1}}
+  @keyframes figin{from{opacity:0}to{opacity:1}}
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+    .fig{transform:translate(-50%,-50%)}
+    .fig .ring{transform:none}
+    .iris{display:none}
   }
 
   @media (max-width:960px){
     .hud-thesis{display:none}
     .hud{grid-template-columns:1fr auto}
-    .play-grid{grid-template-columns:1fr}
-    .visual{max-width:360px}
-    .ch-head{grid-template-columns:1fr}
     .proj{grid-template-columns:1fr;gap:28px;padding:22px}
     .rail{grid-auto-columns:minmax(140px,42%);margin-right:-22px;padding-right:22px}
     .about{grid-template-columns:1fr}
     .credits{grid-template-columns:1fr 1fr}
-    .ch-aside{justify-items:center}
-    .js .ch-aside .px-slot{width:150px;margin:34px 0 30px}
-    .js .ch-name .px-behind{width:min(420px,80%)}
     .team{grid-template-columns:1fr;margin-top:80px}
+  }
+  /* Celular: a cena não fica presa; a figura entra no fluxo, entre o texto e o título */
+  @media (max-width:760px){
+    .scene-wrap{height:auto}
+    .scene{position:relative;height:auto;min-height:100svh;display:flex;flex-direction:column;gap:18px;padding:92px 16px 72px;overflow:visible}
+    .sc-top{max-width:none}
+    .fig,.ch-play .fig,.ch-name .fig{position:relative;left:auto;top:auto;width:min(72vw,46svh);margin:34px auto 64px;transform:scale(calc(.94 + var(--p,0) * .08))}
+    .sc-title{margin-top:auto;align-self:flex-start}
+    .sc-note{text-align:left;align-self:flex-start;max-width:none}
+    .kind{top:auto;bottom:66px}
+    .js .st,.js .st:first-child{position:relative;opacity:1;transform:none}
+    .stats{display:grid;gap:36px}
+    .st{grid-template-columns:1fr;gap:6px}
+    .steps{display:none}
+    .lab{font-size:10px;padding:2px 4px}
+    .ph b{font-size:10px}
+    .fig figcaption{font-size:10px}
   }
   @media (max-width:600px){
     .wrap{padding:0 16px}
@@ -400,17 +438,16 @@
     .hud-wa{width:40px;padding:0}
     .hud-foot{padding:0 12px 12px}
     .hud-foot .hud-count{display:none}
-    .ch{padding:104px 0 88px}
-    .ch-play{padding:96px 0 72px}
-    .ch-head{margin-bottom:40px}
-    .lead{font-size:18px}
     .ch-play .cta .btn{flex:1 1 auto}
-    .visual{max-width:300px;margin:8px auto 0}
-    .stat{grid-template-columns:1fr;min-height:46svh}
+    .lead{font-size:17px}
     .facts li{grid-template-columns:1fr;gap:4px}
     .credits{grid-template-columns:1fr;margin-top:64px}
+    .contact{padding:104px 0 96px}
     .shots{gap:10px}
     .shots figcaption{font-size:12px}
+    .belt{grid-auto-columns:74vw;gap:14px;margin:0 -16px;padding:6px 16px 18px;scroll-padding-inline:16px}
+    .belt::after{content:"";width:1px}
+    .belt-nav button{width:44px;height:44px}
     .kind a{padding:0 14px;min-height:36px}
     .team-out{gap:20px}
     .team-out p{font-size:18px}
@@ -420,6 +457,11 @@
 <body>
 <script>document.documentElement.classList.add('js')</script>
 <a class="skip" href="#videos">Pular para os vídeos</a>
+
+<!-- retícula usada por todas as figuras (a cor segue o tema do capítulo) -->
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <pattern id="ht" width="2.4" height="2.4" patternUnits="userSpaceOnUse"><circle cx="1.2" cy="1.2" r=".6"/></pattern>
+</defs></svg>
 
 <!-- HUD fixo: logo, tese, índice e WhatsApp sempre à mão -->
 <header class="hud">
@@ -438,7 +480,7 @@
   <span class="mono"><span id="hudNum">(00)</span> <span id="hudLabel">Play — início</span></span>
 </div>
 
-<canvas class="px" aria-hidden="true"></canvas>
+<svg class="iris" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><polygon points="30,15 80,50 30,85"/></svg>
 
 <nav class="kind" id="kind" aria-label="Orgânico ou anúncio" data-k="02" aria-hidden="true">
   <i aria-hidden="true"></i>
@@ -472,66 +514,62 @@
 
 <!-- (00) PLAY -->
 <section class="ch ch-play" id="topo" data-ch="00" data-theme="dark" data-label="Play — início">
-  <div class="wrap play-grid">
-    <div>
-      <span class="ch-num mono">(00) — Play</span>
-      <h1><span class="line"><span>Do roteiro</span></span><span class="line"><span>ao <em>play.</em></span></span></h1>
-      <p class="role" aria-label="Social Media, Videomaker, Conteúdo com IA"><span>Social Media</span><span>Videomaker</span><span>Conteúdo com IA</span></p>
-      <p class="lead">Sou o <strong>Renan Bianchi</strong>. Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só. <strong>6 anos</strong> em marketing digital, 4 deles em agência.</p>
-      <div class="cta">
-        <a class="btn primary" href="#videos">Ver trabalhos
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
-        <a class="btn" href="https://wa.me/5511997468837" target="_blank" rel="noopener">Falar no WhatsApp</a>
+  <div class="scene-wrap" style="--len:118">
+    <div class="scene">
+      <div class="sc-top">
+        <span class="ch-num mono">(00) — Play</span>
+        <p class="role" aria-label="Social Media, Videomaker, Conteúdo com IA"><span>Social Media</span><span>Videomaker</span><span>Conteúdo com IA</span></p>
+        <p class="lead">Sou o <strong>Renan Bianchi</strong>. Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só. <strong>6 anos</strong> em marketing digital, 4 deles em agência.</p>
+        <div class="cta">
+          <a class="btn primary" href="#videos">Ver trabalhos
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
+          <a class="btn" href="https://wa.me/5511997468837" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        </div>
       </div>
-    </div>
-    <div class="visual" aria-hidden="true" data-px="play">
-      <svg viewBox="0 0 440 460">
-        <defs>
-          <pattern id="dots" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="6.5" cy="6.5" r="2.4" fill="#8b5cf6"/></pattern>
-        </defs>
-        <g class="tri-dots">
-          <polygon class="tri-fill" points="96,58 372,230 96,402" fill="url(#dots)"/>
-          <polygon points="96,58 372,230 96,402" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-linejoin="round"/>
-        </g>
-        <g stroke="currentColor" stroke-width="1" opacity=".6">
-          <line x1="96" y1="58" x2="60" y2="22"/><line x1="60" y1="22" x2="24" y2="22"/>
-          <line x1="372" y1="230" x2="410" y2="190"/>
-          <line x1="96" y1="402" x2="60" y2="438"/><line x1="60" y1="438" x2="24" y2="438"/>
-        </g>
-        <text x="24" y="14">[ ROTEIRO ]</text>
-        <text x="300" y="182">[ CAPTAÇÃO ]</text>
-        <text x="24" y="458">[ EDIÇÃO ]</text>
-      </svg>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><g class="ring"><path id="rg00" d="M50 -5a55 55 0 1 1 0 110a55 55 0 1 1 0-110" fill="none"/><text textLength="341" lengthAdjust="spacing"><textPath href="#rg00">Roteiro · Captação · Edição · Design · IA · Roteiro · Captação · Edição · Design · IA · Roteiro · Captação · Edição · Design · IA · </textPath></text></g><path class="ff" d="M22 12L86 50L22 88Z" fill="url(#ht)"/><path class="fl" d="M22 12L86 50L22 88Z"/><path class="ln" d="M22 12L4 -2"/><circle class="dot" cx="22" cy="12" r=".9"/><path class="ln" d="M86 50L98 34"/><circle class="dot" cx="86" cy="50" r=".9"/><path class="ln" d="M22 88L4 102"/><circle class="dot" cx="22" cy="88" r=".9"/></svg><span class="lab mono" style="left:7.4%;top:1.9%">[ Roteiro ]</span><span class="lab mono" style="left:94.4%;top:35.2%">[ Captação ]</span><span class="lab mono" style="left:7.4%;top:98.1%">[ Edição ]</span><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 00 · ▶ PLAY</figcaption></figure>
+      <h1 class="sc-title"><span class="line"><span>Do roteiro</span></span><span class="line"><span>ao <em>play.</em></span></span></h1>
     </div>
   </div>
 </section>
 
-<!-- (01) NÚMEROS -->
+<!-- (01) NÚMEROS: a cena fica presa e troca um número por vez -->
 <section class="ch" id="numeros" data-ch="01" data-theme="purple" data-label="Números — em resumo">
-  <div class="wrap">
-    <div class="ch-head">
-      <div><span class="ch-num mono">(01) — Números</span><h2>Em números</h2></div>
-      <div class="ch-aside" aria-hidden="true"><div class="px-slot" data-px="grid" data-ring></div></div>
+  <div class="scene-wrap" style="--len:360" data-steps="4">
+    <div class="scene">
+      <div class="sc-top">
+        <span class="ch-num mono">(01) — Números</span>
+        <h2 class="long" style="font-size:clamp(48px,6vw,88px)">Em números</h2>
+        <div class="steps" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+      </div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><path class="ff" d="M4.00 50.00a46 46 0 1 0 92 0a46 46 0 1 0 -92 0zM41.00 25.00a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM64.78 42.27a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM55.69 70.23a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM26.31 70.23a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM17.22 42.27a9 9 0 1 0 18 0a9 9 0 1 0 -18 0zM46.00 50.00a4 4 0 1 0 8 0a4 4 0 1 0 -8 0z" fill="url(#ht)" fill-rule="evenodd"/><path class="fl" d="M4.00 50.00a46 46 0 1 0 92 0a46 46 0 1 0 -92 0z"/></svg><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 01 · ROLO DE FILME</figcaption></figure>
+      <ul class="stats">
+        <li class="st on"><b>6</b><p><span class="mono">[ Tempo de estrada ]</span>anos em marketing digital, 4 deles em agência</p></li>
+        <li class="st"><b>35<i>+</i></b><p><span class="mono">[ Vídeo ]</span>clientes atendidos como videomaker</p></li>
+        <li class="st"><b>60<i>+</i></b><p><span class="mono">[ Design ]</span>clientes atendidos como designer</p></li>
+        <li class="st"><b>21<i>K</i></b><p><span class="mono">[ Fonte: um Reel orgânico ]</span>views em um único Reel orgânico</p></li>
+      </ul>
     </div>
-    <div class="stat"><b class="count" data-to="6">6</b><p><span class="mono">[ Tempo de estrada ]</span>anos em marketing digital, 4 deles em agência</p></div>
-    <div class="stat"><b class="count" data-to="35" data-suffix="+">35<i>+</i></b><p><span class="mono">[ Vídeo ]</span>clientes atendidos como videomaker</p></div>
-    <div class="stat"><b class="count" data-to="60" data-suffix="+">60<i>+</i></b><p><span class="mono">[ Design ]</span>clientes atendidos como designer</p></div>
-    <div class="stat"><b class="count" data-to="21" data-suffix="K">21<i>K</i></b><p><span class="mono">[ Fonte: um Reel orgânico ]</span>views em um único Reel orgânico</p></div>
   </div>
 </section>
 
 <!-- (02) REELS -->
 <section class="ch" id="videos" data-ch="02" data-theme="dark" data-label="Reels — captação">
-  <div class="wrap">
-    <div class="ch-head">
-      <div>
-        <span class="ch-num mono">(02) — Vídeos</span><h2>Reels</h2>
-        <p class="brk mono" aria-label="Roteiro, captação e edição"><span>[ Roteiro ]</span><i></i><span>[ Captação ]</span><i></i><span>[ Edição ]</span></p>
+  <div class="scene-wrap" style="--len:140">
+    <div class="scene">
+      <div class="sc-top">
+        <span class="ch-num mono">(02) — Vídeos</span>
+        <p>Roteiro, captação e edição para marcas de nichos diferentes. Dê play direto aqui.</p>
       </div>
-      <div class="ch-aside"><div class="px-slot" data-px="phone" data-ring aria-hidden="true"></div>
-        <p class="lead2">Roteiro, captação e edição para marcas de nichos diferentes. Dê play direto aqui.</p></div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><path class="ff" d="M31 14h38v72H31z M44 40l16 10-16 10z" fill="url(#ht)" fill-rule="evenodd"/><path class="fl" d="M34 4h32a8 8 0 0 1 8 8v76a8 8 0 0 1-8 8H34a8 8 0 0 1-8-8V12a8 8 0 0 1 8-8z M45 9h10"/><path class="ln" d="M31 22L6 8"/><circle class="dot" cx="31" cy="22" r=".9"/><path class="ln" d="M69 44L96 34"/><circle class="dot" cx="69" cy="44" r=".9"/><path class="ln" d="M31 78L6 92"/><circle class="dot" cx="31" cy="78" r=".9"/></svg><span class="lab mono" style="left:9.3%;top:11.1%">[ Roteiro ]</span><span class="lab mono" style="left:92.6%;top:35.2%">[ Captação ]</span><span class="lab mono" style="left:9.3%;top:88.9%">[ Edição ]</span><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 02 · REEL 9:16</figcaption></figure>
+      <h2 class="sc-title">Reels</h2>
+      <p class="sc-note mono">11 Reels · Instagram</p>
     </div>
-    <ul class="reels">
+  </div>
+  <div class="wrap after">
+    <div class="belt-wrap">
+      <div class="belt-bar"><span class="mono belt-count" aria-hidden="true">01 / 11</span>
+        <div class="belt-nav"><button class="prev" type="button" aria-label="Reels anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button class="next" type="button" aria-label="Próximos Reels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+      <ul class="belt" tabindex="0" aria-label="Esteira de Reels">
       <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DdR7VBUvK1J/"><a href="https://www.instagram.com/p/DdR7VBUvK1J/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Auto Design</b><span>Roteiro · Captação · Edição</span></p></li>
       <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DaNZJDsSixp/"><a href="https://www.instagram.com/p/DaNZJDsSixp/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
@@ -554,52 +592,63 @@
         <p class="cap"><b>Dra. Adriana Menezes</b><span>Roteiro · Captação · Edição</span></p></li>
       <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DbN36yBCTaw/"><a href="https://www.instagram.com/p/DbN36yBCTaw/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
         <p class="cap"><b>Barella Caminhões</b><span>Roteiro · Captação</span></p></li>
-    </ul>
+      </ul>
+    </div>
   </div>
 </section>
 
 <!-- (03) ANÚNCIOS: vídeos na pasta "ads" (mp4 até 5 MB + capa jpg) -->
 <section class="ch" id="anuncios" data-ch="03" data-theme="purple" data-label="Anúncios — Meta Ads">
-  <div class="wrap">
-    <div class="ch-head">
-      <div>
-        <span class="ch-num mono">(03) — Anúncios</span><h2>Anúncios</h2>
-        <p class="brk mono" aria-label="Roteiro e edição para Meta Ads"><span>[ Roteiro ]</span><i></i><span>[ Edição ]</span><i></i><span>[ Meta Ads ]</span></p>
+  <div class="scene-wrap" style="--len:140">
+    <div class="scene">
+      <div class="sc-top">
+        <span class="ch-num mono">(03) — Anúncios</span>
+        <p>Criativos em vídeo para Meta Ads, do roteiro à edição. Passe o mouse para a prévia; clique para assistir com som.</p>
       </div>
-      <div class="ch-aside"><div class="px-slot" data-px="mega" data-ring aria-hidden="true"></div>
-        <p class="lead2">Criativos em vídeo para Meta Ads, do roteiro à edição. Passe o mouse para a prévia; clique para assistir com som.</p></div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><path class="ff" d="M10 38h18l46-26v76L28 62H10z M28 62h10l5 24h-10z" fill="url(#ht)"/><path class="fl" d="M82 36q7 14 0 28M90 28q11 22 0 44"/><path class="ln" d="M19 38L6 20"/><circle class="dot" cx="19" cy="38" r=".9"/><path class="ln" d="M60 20L66 2"/><circle class="dot" cx="60" cy="20" r=".9"/><path class="ln" d="M92 60L98 84"/><circle class="dot" cx="92" cy="60" r=".9"/></svg><span class="lab mono" style="left:9.3%;top:22.2%">[ Roteiro ]</span><span class="lab mono" style="left:64.8%;top:5.6%">[ Edição ]</span><span class="lab mono" style="left:94.4%;top:81.5%">[ Meta Ads ]</span><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 03 · CRIATIVO</figcaption></figure>
+      <h2 class="sc-title">Anúncios</h2>
+      <p class="sc-note mono">8 criativos · Meta Ads</p>
     </div>
-    <ul class="reels">
-      <li class="card"><div class="vid"><video src="ads/081.mp4" poster="ads/081.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 081 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 081 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+  </div>
+  <div class="wrap after">
+    <div class="belt-wrap">
+      <div class="belt-bar"><span class="mono belt-count" aria-hidden="true">01 / 08</span>
+        <div class="belt-nav"><button class="prev" type="button" aria-label="Anúncios anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button><button class="next" type="button" aria-label="Próximos anúncios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button></div></div>
+      <ul class="belt" tabindex="0" aria-label="Esteira de anúncios">
+      <li class="card"><div class="vid"><video src="ads/081.mp4" data-poster="ads/081.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 081 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 081 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/072.mp4" poster="ads/072.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 072 — carro, 10 carros vendidos"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 072 — carro, 10 carros vendidos"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/072.mp4" data-poster="ads/072.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 072 — carro, 10 carros vendidos"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 072 — carro, 10 carros vendidos"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/084.mp4" poster="ads/084.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 084 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 084 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/084.mp4" data-poster="ads/084.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 084 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 084 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/119.mp4" poster="ads/119.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 119 — carro, reframe de follow-up"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 119 — carro, reframe de follow-up"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/119.mp4" data-poster="ads/119.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 119 — carro, reframe de follow-up"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 119 — carro, reframe de follow-up"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/102.mp4" poster="ads/102.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 102 — moto, IA responde rápido"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 102 — moto, IA responde rápido"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/102.mp4" data-poster="ads/102.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 102 — moto, IA responde rápido"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 102 — moto, IA responde rápido"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/158.mp4" poster="ads/158.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 158 — venda IA + tráfego"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 158 — venda IA + tráfego"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/158.mp4" data-poster="ads/158.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 158 — venda IA + tráfego"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 158 — venda IA + tráfego"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/112.mp4" poster="ads/112.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 112 — caminhão, o cliente está no Instagram"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 112 — caminhão, o cliente está no Instagram"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/112.mp4" data-poster="ads/112.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 112 — caminhão, o cliente está no Instagram"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 112 — caminhão, o cliente está no Instagram"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-      <li class="card"><div class="vid"><video src="ads/115.mp4" poster="ads/115.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 115 — caminhão, pergunta de auditoria"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 115 — caminhão, pergunta de auditoria"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
+      <li class="card"><div class="vid"><video src="ads/115.mp4" data-poster="ads/115.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 115 — caminhão, pergunta de auditoria"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 115 — caminhão, pergunta de auditoria"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
         <p class="cap"><b>Roteiro e edição — criativo para Meta Ads</b></p></li>
-    </ul>
+      </ul>
+    </div>
   </div>
 </section>
 
 <!-- (04) PROJETOS AUTORAIS -->
 <section class="ch" id="projetos" data-ch="04" data-theme="dark" data-label="Projetos — autorais">
-  <div class="wrap">
-    <div class="ch-head">
-      <div><span class="ch-num mono">(04) — Projetos</span><h2>Projetos autorais</h2></div>
-      <div class="ch-aside" aria-hidden="true"><div class="px-slot" data-px="site" data-ring></div></div>
+  <div class="scene-wrap" style="--len:140">
+    <div class="scene">
+      <div class="sc-top"><span class="ch-num mono">(04) — Projetos</span></div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><path class="ff" d="M54 30h36v40H54z M10 30h38v8H10z M10 42h30v4H10z M10 50h34v4H10z M10 60h16v7H10z" fill="url(#ht)"/><path class="fl" d="M4 14h92v72H4z M4 22h92"/><path class="ln" d="M18 63L6 96"/><circle class="dot" cx="18" cy="63" r=".9"/><path class="ln" d="M72 30L96 4"/><circle class="dot" cx="72" cy="30" r=".9"/><path class="ln" d="M80 70L98 96"/><circle class="dot" cx="80" cy="70" r=".9"/></svg><span class="lab mono" style="left:9.3%;top:92.6%">[ App ]</span><span class="lab mono" style="left:92.6%;top:7.4%">[ Site ]</span><span class="lab mono" style="left:94.4%;top:92.6%">[ Método ]</span><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 04 · INTERFACE</figcaption></figure>
+      <h2 class="sc-title long">Projetos<br>autorais</h2>
+      <p class="sc-note mono">04.1 App · 04.2 Site · 04.3 Método</p>
     </div>
-
+  </div>
+  <div class="wrap after">
     <div class="sub">
-      <p class="sub-label mono">(04.1) — App</p>
+      <p class="after-head mono">(04.1) — App</p>
       <article class="proj">
         <div>
           <h3>Cronomante</h3>
@@ -607,7 +656,7 @@
           <ul class="tags"><li>Claude Code</li><li>Remotion</li><li>ElevenLabs</li><li>Produto</li></ul>
         </div>
         <ul class="rail" aria-label="Telas e vídeo do Cronomante">
-          <li><figure><div class="vid"><video src="projetos/cronomante-ep04.mp4" poster="projetos/cronomante-ep04.jpg" preload="none" playsinline width="720" height="1280" aria-label="Vídeo de divulgação do Cronomante"></video><button class="vid-btn" type="button" aria-label="Assistir com som: vídeo de divulgação do Cronomante"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div><figcaption>Vídeo de divulgação</figcaption></figure></li>
+          <li><figure><div class="vid"><video src="projetos/cronomante-ep04.mp4" data-poster="projetos/cronomante-ep04.jpg" preload="none" playsinline width="720" height="1280" aria-label="Vídeo de divulgação do Cronomante"></video><button class="vid-btn" type="button" aria-label="Assistir com som: vídeo de divulgação do Cronomante"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div><figcaption>Vídeo de divulgação</figcaption></figure></li>
           <li><figure><img src="projetos/cronomante-tela-1.jpg" alt="Tela inicial do Cronomante: personagem Órion no nível 4, barra de XP e missões do dia" width="591" height="1280" loading="lazy"><figcaption>Personagem</figcaption></figure></li>
           <li><figure><img src="projetos/cronomante-tela-2.jpg" alt="Seleção de personagens do Cronomante: Órion, Brisa e um terceiro em breve" width="591" height="1280" loading="lazy"><figcaption>Personagens</figcaption></figure></li>
           <li><figure><img src="projetos/cronomante-tela-3.jpg" alt="Estatísticas do Cronomante: radar de atributos como Zelo, Vigor e Laço" width="591" height="1280" loading="lazy"><figcaption>Estatísticas</figcaption></figure></li>
@@ -617,7 +666,7 @@
     </div>
 
     <div class="sub">
-      <p class="sub-label mono">(04.2) — Site</p>
+      <p class="after-head mono">(04.2) — Site</p>
       <article class="proj">
         <div>
           <h3 class="long">Site institucional — agência de marketing automotivo</h3>
@@ -633,7 +682,7 @@
     </div>
 
     <div class="sub">
-      <p class="sub-label mono">(04.3) — Método</p>
+      <p class="after-head mono">(04.3) — Método</p>
       <article class="proj-mini">
         <div>
           <h3>Eugência</h3>
@@ -646,22 +695,25 @@
   </div>
 </section>
 
-<!-- (05) HABILIDADES: índice tipográfico -->
+<!-- (05) HABILIDADES: índice tipográfico + Monte seu time -->
 <section class="ch" id="habilidades" data-ch="05" data-theme="purple" data-label="Habilidades — índice">
-  <div class="wrap">
-    <div class="ch-head">
-      <div><span class="ch-num mono">(05) — Habilidades</span><h2>Índice</h2></div>
-      <p class="lead2">Funções, ferramentas e marcas com quem trabalhei.</p>
+  <div class="scene-wrap" style="--len:140">
+    <div class="scene">
+      <div class="sc-top">
+        <span class="ch-num mono">(05) — Habilidades</span>
+        <p>Funções, ferramentas e marcas com quem trabalhei.</p>
+      </div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><path class="ff" d="M50 8c17 0 26 10 33 20s14 22 9 36-16 26-32 28-30-4-39-16S6 48 12 34 33 8 50 8z" fill="url(#ht)"/><path class="fl" d="M50 8c17 0 26 10 33 20s14 22 9 36-16 26-32 28-30-4-39-16S6 48 12 34 33 8 50 8z"/><path class="ln" d="M24 20L4 6"/><circle class="dot" cx="24" cy="20" r=".9"/><path class="ln" d="M90 42L98 26"/><circle class="dot" cx="90" cy="42" r=".9"/><path class="ln" d="M30 86L10 100"/><circle class="dot" cx="30" cy="86" r=".9"/></svg><span class="lab mono" style="left:7.4%;top:9.3%">[ Funções ]</span><span class="lab mono" style="left:94.4%;top:27.8%">[ Ferramentas ]</span><span class="lab mono" style="left:13.0%;top:96.3%">[ Marcas ]</span><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 05 · MANCHA</figcaption></figure>
+      <h2 class="sc-title">Índice</h2>
     </div>
-    <div class="idx-wrap">
-    <div class="px-slot px-behind" data-px="blob" data-a=".5" aria-hidden="true"></div>
+  </div>
+  <div class="wrap after">
     <div class="idx"><p class="mono">[ Funções ]</p>
       <ul><li>Roteiro</li><li>Captação</li><li>Edição</li><li>Design</li><li>Copywriting</li><li>Calendário editorial</li><li>Roteiro de anúncios</li><li>Social media</li></ul></div>
     <div class="idx"><p class="mono">[ Ferramentas ]</p>
       <ul><li>CapCut</li><li>Remotion</li><li>Photoshop</li><li>Canva</li><li>ChatGPT</li><li>Claude</li><li>Claude Code</li><li>Gemini</li><li>Magnific</li><li>Google Flow</li><li>Dreamina</li><li>ElevenLabs</li></ul></div>
     <div class="idx"><p class="mono">[ Marcas nos Reels ]</p>
       <ul><li>Auto Design</li><li>Auto Prosperità</li><li>Aliquantum Suzuki</li><li>Island Motors SJC</li><li>Dr. Roberto Dente</li><li>Dra. Adriana Menezes</li><li>Barella Caminhões</li></ul></div>
-    </div>
 
     <div class="team">
       <div>
@@ -682,11 +734,14 @@
 
 <!-- (06) SOBRE -->
 <section class="ch" id="sobre" data-ch="06" data-theme="dark" data-label="Sobre — arte + estratégia">
-  <div class="wrap">
-    <div class="ch-head">
-      <div><span class="ch-num mono">(06) — Sobre</span><h2>Arte + estratégia</h2></div>
-      <div class="ch-aside" aria-hidden="true"><div class="px-slot" data-px="bust" data-ring></div></div>
+  <div class="scene-wrap" style="--len:140">
+    <div class="scene">
+      <div class="sc-top"><span class="ch-num mono">(06) — Sobre</span></div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><path class="ff" d="M6.0 40.0h3.6v20h-3.6zM12.4 33.0h3.6v34h-3.6zM18.8 24.0h3.6v52h-3.6zM25.2 35.0h3.6v30h-3.6zM31.6 15.0h3.6v70h-3.6zM38.0 28.0h3.6v44h-3.6zM44.4 8.0h3.6v84h-3.6zM50.8 21.0h3.6v58h-3.6zM57.2 32.0h3.6v36h-3.6zM63.6 17.0h3.6v66h-3.6zM70.0 36.0h3.6v28h-3.6zM76.4 26.0h3.6v48h-3.6zM82.8 39.0h3.6v22h-3.6zM89.2 44.0h3.6v12h-3.6z" fill="url(#ht)"/><path class="fl" d="M2 50h96"/><path class="ln" d="M7.8 40L4 22"/><circle class="dot" cx="7.8" cy="40" r=".9"/><path class="ln" d="M33.4 15L30 0"/><circle class="dot" cx="33.4" cy="15" r=".9"/><path class="ln" d="M59 32L76 12"/><circle class="dot" cx="59" cy="32" r=".9"/><path class="ln" d="M84.6 61L96 80"/><circle class="dot" cx="84.6" cy="61" r=".9"/></svg><span class="lab mono" style="left:7.4%;top:24.1%">[ Tatuagem ]</span><span class="lab mono" style="left:31.5%;top:3.7%">[ Música ]</span><span class="lab mono" style="left:74.1%;top:14.8%">[ Agência ]</span><span class="lab mono" style="left:92.6%;top:77.8%">[ IA ]</span><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 06 · RITMO</figcaption></figure>
+      <h2 class="sc-title long">Arte +<br>estratégia</h2>
     </div>
+  </div>
+  <div class="wrap after">
     <div class="about">
       <div>
         <p>Venho da tatuagem e da música, e levo esse olhar para o conteúdo. Há 4 anos cuido de redes de marcas de vários nichos em uma agência de Santo André, do roteiro à peça final.</p>
@@ -704,11 +759,15 @@
 
 <!-- (07) RENAN -->
 <section class="ch ch-name" id="renan" data-ch="07" data-theme="purple" data-label="Renan — assinatura">
-  <div class="wrap">
-    <div class="px-slot px-behind" data-px="bust" data-a=".55" aria-hidden="true"></div>
-    <span class="ch-num mono">(07) — Assinatura</span>
-    <p class="big-name" aria-label="Renan">Renan</p>
-    <p class="closing">Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só.</p>
+  <div class="scene-wrap" style="--len:150">
+    <div class="scene">
+      <div class="sc-top">
+        <span class="ch-num mono">(07) — Assinatura</span>
+        <p class="closing">Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só.</p>
+      </div>
+      <figure class="fig" aria-hidden="true"><svg viewBox="-4 -4 108 108" focusable="false"><g class="ring"><path id="rg07" d="M50 -5a55 55 0 1 1 0 110a55 55 0 1 1 0-110" fill="none"/><text textLength="341" lengthAdjust="spacing"><textPath href="#rg07">Roteiro · Captação · Edição · Design · IA · Roteiro · Captação · Edição · Design · IA · Roteiro · Captação · Edição · Design · IA · </textPath></text></g><path class="ff" d="M50 12a16 16 0 1 1 0 32a16 16 0 1 1 0-32z M43 42h14v14H43z M10 98c0-24 17-38 40-38s40 14 40 38z" fill="url(#ht)"/></svg><i class="cx tl"></i><i class="cx tr"></i><i class="cx bl"></i><i class="cx br"></i><i class="ph"><b class="mono tc">00:00:00:00</b></i><figcaption class="mono">FIG. 07 · ASSINATURA</figcaption></figure>
+      <p class="sc-title big big-name" aria-label="Renan">Renan</p>
+    </div>
   </div>
 </section>
 
@@ -759,18 +818,35 @@
   var hudCount = document.getElementById('hudCount'), hudBar = document.getElementById('hudBar');
   var menuLinks = [].slice.call(document.querySelectorAll('.menu ol a'));
   var metaTheme = document.querySelector('meta[name="theme-color"]');
+  var kind = document.getElementById('kind'), kindLinks = [].slice.call(kind.querySelectorAll('a'));
 
-  // Capítulo ativo = o que cruza o meio da tela: troca cor, status do HUD e índice
+  // Troca de cor: o ▶ cresce na cor do próximo capítulo e "abre" a tela
+  var iris = document.querySelector('.iris'), irisPoly = iris.querySelector('polygon');
+  var theme = 'dark', t1, t2;
+  function applyTheme(t){
+    if (t === 'purple') body.setAttribute('data-theme', 'purple'); else body.removeAttribute('data-theme');
+    metaTheme.setAttribute('content', t === 'purple' ? '#8b5cf6' : '#0a090e');
+  }
+  function setTheme(t, instant){
+    if (t === theme) return;
+    theme = t; clearTimeout(t1); clearTimeout(t2);
+    if (instant || reduce){ iris.classList.remove('go'); applyTheme(t); return; }
+    iris.classList.remove('go'); void iris.getBoundingClientRect();
+    irisPoly.style.fill = t === 'purple' ? '#8b5cf6' : '#0a090e';
+    iris.classList.add('go');
+    t1 = setTimeout(function(){ applyTheme(theme); t2 = setTimeout(function(){ iris.classList.remove('go'); }, 650); }, 420);
+  }
+
+  // Capítulo ativo = o que cruza o meio da tela: cor, status do HUD, índice e toggle
+  var first = true;
   function setActive(sec){
-    var n = sec.getAttribute('data-ch'), theme = sec.getAttribute('data-theme');
-    if (theme === 'purple') body.setAttribute('data-theme', 'purple'); else body.removeAttribute('data-theme');
-    metaTheme.setAttribute('content', theme === 'purple' ? '#8b5cf6' : '#0a090e');
+    var n = sec.getAttribute('data-ch');
+    setTheme(sec.getAttribute('data-theme'), first); first = false;
     hudNum.textContent = '(' + n + ')';
     hudLabel.textContent = sec.getAttribute('data-label');
     hudCount.textContent = n + ' / ' + ('0' + total).slice(-2);
     hudBar.style.transform = 'scaleX(' + (parseInt(n, 10) / total) + ')';
     menuLinks.forEach(function(a){ a.setAttribute('aria-current', a.getAttribute('data-to') === n ? 'true' : 'false'); });
-    // toggle Orgânico / Anúncio só aparece nos capítulos de vídeo
     var on = n === '02' || n === '03';
     kind.classList.toggle('on', on);
     kind.setAttribute('aria-hidden', on ? 'false' : 'true');
@@ -779,10 +855,7 @@
       a.tabIndex = on ? 0 : -1;
       if (on) a.setAttribute('aria-current', a.getAttribute('data-k') === n ? 'true' : 'false');
     });
-    window.__ch = sec;
-    if (window.pxGo) window.pxGo(sec);
   }
-  var kind = document.getElementById('kind'), kindLinks = [].slice.call(kind.querySelectorAll('a'));
   if ('IntersectionObserver' in window){
     var cio = new IntersectionObserver(function(es){
       es.forEach(function(e){ if (e.isIntersecting) setActive(e.target); });
@@ -790,31 +863,33 @@
     chapters.forEach(function(s){ cio.observe(s); });
   }
 
-  // Números contam ao entrar na tela
-  var counts = document.querySelectorAll('.count');
-  function runCount(el){
-    var to = +el.getAttribute('data-to'), suf = el.getAttribute('data-suffix') || '';
-    var t0 = null, dur = 1400;
-    function frame(t){
-      if (!t0) t0 = t;
-      var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 4);
-      el.innerHTML = Math.round(to * e) + (suf ? '<i>' + suf + '</i>' : '');
-      if (p < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+  // Cenas: o scroll vira o tempo da cena (--p de 0 a 1): figura, anel, playhead e timecode
+  var wraps = [].slice.call(document.querySelectorAll('.scene-wrap')).map(function(w){
+    return {el: w, tc: w.querySelector('.tc'), steps: w.getAttribute('data-steps') | 0,
+            st: [].slice.call(w.querySelectorAll('.st')), dots: [].slice.call(w.querySelectorAll('.steps i')), last: -1};
+  });
+  var ticking = false;
+  function two(n){ return (n < 10 ? '0' : '') + n; }
+  function scrub(){
+    ticking = false;
+    var vh = innerHeight;
+    wraps.forEach(function(w){
+      var r = w.el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > vh) return;
+      var span = r.height - vh, p;
+      p = span > vh * .2 ? -r.top / span : (vh - r.top) / (vh + r.height);
+      p = Math.max(0, Math.min(1, p));
+      w.el.style.setProperty('--p', p.toFixed(4));
+      if (w.tc){ var f = Math.round(p * 12 * 24); w.tc.textContent = '00:00:' + two(Math.floor(f / 24)) + ':' + two(f % 24); }
+      if (w.steps){
+        var k = Math.min(w.steps - 1, Math.floor(p * w.steps));
+        if (k !== w.last){ w.last = k; w.st.forEach(function(s, i){ s.classList.toggle('on', i === k); }); w.dots.forEach(function(d, i){ d.classList.toggle('on', i <= k); }); }
+      }
+    });
   }
-  if (!reduce && 'IntersectionObserver' in window){
-    var nio = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if (e.isIntersecting){ runCount(e.target); nio.unobserve(e.target); } });
-    }, {threshold:.6});
-    counts.forEach(function(c){ nio.observe(c); });
-  }
-
-  // Visual do play pausa fora da tela
-  var visual = document.querySelector('.visual');
-  if (visual && 'IntersectionObserver' in window){
-    new IntersectionObserver(function(es){ visual.classList.toggle('off', !es[0].isIntersecting); }).observe(visual);
-  }
+  addEventListener('scroll', function(){ if (!ticking){ ticking = true; requestAnimationFrame(scrub); } }, {passive:true});
+  addEventListener('resize', scrub);
+  scrub();
 
   // Índice (pular para)
   var menu = document.getElementById('menu'), menuBtn = document.querySelector('.hud-menu');
@@ -834,9 +909,48 @@
     }
   });
 
+  // Esteiras: setas andam uma "tela" de cards; contador mostra quais estão à vista
+  [].slice.call(document.querySelectorAll('.belt-wrap')).forEach(function(w){
+    var belt = w.querySelector('.belt'), prev = w.querySelector('.prev'), next = w.querySelector('.next'), cnt = w.querySelector('.belt-count');
+    var n = belt.children.length;
+    function step(){ var c = belt.children[0].getBoundingClientRect().width; return c + (parseFloat(getComputedStyle(belt).columnGap) || 20); }
+    function vis(){ return Math.max(1, Math.floor((belt.clientWidth - 40) / step()) || 1); }
+    function upd(){
+      var s = step(), i = Math.round(belt.scrollLeft / s), v = vis();
+      cnt.textContent = two(Math.min(n, i + 1)) + (v > 1 ? '–' + two(Math.min(n, i + v)) : '') + ' / ' + two(n);
+      prev.disabled = belt.scrollLeft < 4;
+      next.disabled = belt.scrollLeft + belt.clientWidth >= belt.scrollWidth - 4;
+    }
+    prev.addEventListener('click', function(){ belt.scrollBy({left: -step() * vis(), behavior: reduce ? 'auto' : 'smooth'}); });
+    next.addEventListener('click', function(){ belt.scrollBy({left: step() * vis(), behavior: reduce ? 'auto' : 'smooth'}); });
+    var bt = false;
+    belt.addEventListener('scroll', function(){ if (!bt){ bt = true; requestAnimationFrame(function(){ bt = false; upd(); }); } }, {passive:true});
+    addEventListener('resize', upd);
+    upd();
+  });
+
+  // Monte seu time: liga funções, o número de pessoas continua 1
+  var teamBtns = [].slice.call(document.querySelectorAll('.team-opts button'));
+  var teamN = document.querySelector('.team-n'), teamMsg = document.getElementById('teamMsg');
+  teamBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+      var k = teamBtns.filter(function(x){ return x.getAttribute('aria-pressed') === 'true'; }).length;
+      teamMsg.textContent = k === 0 ? 'Ligue uma função.' : k === teamBtns.length ? 'Todas as funções, 1 pessoa: o Renan.' : k + (k === 1 ? ' função' : ' funções') + ', 1 pessoa: o Renan.';
+      teamN.classList.remove('bump'); void teamN.offsetWidth; teamN.classList.add('bump');
+    });
+  });
+
   // Vídeos nativos: prévia muda no hover (desktop); clique/toque abre em tela cheia com som
   var canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
   var boxes = [].slice.call(document.querySelectorAll('.vid'));
+  // capas só carregam quando a esteira chega perto da tela (não disputam a primeira carga)
+  function posters(root){ [].slice.call(root.querySelectorAll('video[data-poster]')).forEach(function(v){ v.poster = v.getAttribute('data-poster'); v.removeAttribute('data-poster'); }); }
+  var lanes = [].slice.call(document.querySelectorAll('.belt,.rail'));
+  if ('IntersectionObserver' in window){
+    var pio = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ posters(e.target); pio.unobserve(e.target); } }); }, {rootMargin: '700px 0px'});
+    lanes.forEach(function(l){ pio.observe(l); });
+  } else posters(document);
   function reset(box){ var v = box.querySelector('video'); v.pause(); v.controls = false; v.muted = true; box.classList.remove('full','preview'); }
   function openFull(box){
     boxes.forEach(function(b){ if (b !== box) reset(b); });
@@ -863,19 +977,6 @@
     if (!document.fullscreenElement) boxes.forEach(function(b){ if (b.classList.contains('full')) reset(b); });
   });
 
-  // Monte seu time: liga funções, o número de pessoas continua 1
-  var teamBtns = [].slice.call(document.querySelectorAll('.team-opts button'));
-  var teamN = document.querySelector('.team-n'), teamMsg = document.getElementById('teamMsg');
-  teamBtns.forEach(function(b){
-    b.addEventListener('click', function(){
-      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
-      var k = teamBtns.filter(function(x){ return x.getAttribute('aria-pressed') === 'true'; }).length;
-      teamMsg.textContent = k === 0 ? 'Ligue uma função.' : k === teamBtns.length ? 'Todas as funções, 1 pessoa: o Renan.' : k + (k === 1 ? ' função' : ' funções') + ', 1 pessoa: o Renan.';
-      teamN.classList.remove('bump'); void teamN.offsetWidth; teamN.classList.add('bump');
-      if (window.pxPulse) window.pxPulse();
-    });
-  });
-
   // Compartilhar (Web Share API; sem ela, copia o link)
   var share = document.getElementById('share');
   share.addEventListener('click', function(){
@@ -887,9 +988,10 @@
     else done('Copie: ' + data.url + ' ');
   });
 
-  // Reels: o iframe do Instagram só carrega perto da tela e avisa a própria altura
-  var quotes = document.querySelectorAll('blockquote.ig'), frames = [];
+  // Reels: o iframe do Instagram só carrega quando o card chega perto da área visível da esteira
+  var quotes = [].slice.call(document.querySelectorAll('blockquote.ig')), frames = [];
   function mount(q){
+    if (q.querySelector('iframe')) return;
     var f = document.createElement('iframe');
     f.className = 'ig-frame'; f.src = q.getAttribute('data-instgrm-permalink') + 'embed/';
     f.title = 'Reel no Instagram'; f.setAttribute('scrolling','no'); f.setAttribute('allowfullscreen','');
@@ -905,179 +1007,16 @@
     }
   });
   if (!('IntersectionObserver' in window)) { quotes.forEach(mount); return; }
-  var io = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if (e.isIntersecting){ mount(e.target); io.unobserve(e.target); } });
-  }, {rootMargin:'900px 0px'});
-  quotes.forEach(function(q){ io.observe(q); });
-})();
-</script>
-<script>
-// V2 · Partículas: os pontos mudam de forma a cada capítulo (▶, grade, celular, megafone, site, mancha, silhueta)
-// e um anel de texto gira com o scroll. Canvas 2D, pausa fora da tela, menos pontos no celular,
-// sem movimento com "reduzir movimento" (a figura aparece parada).
-(function(){
-  var cv = document.querySelector('.px');
-  if (!cv || !cv.getContext || !window.Path2D) return;
-  var ctx = cv.getContext('2d');
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var small = matchMedia('(max-width: 600px)').matches;
-  var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-  var N = small ? 340 : 700;
-  var DEF = {
-    play:  {f:['M21.8 12.6L84.5 50L21.8 87.4Z']},
-    phone: {f:['M36 4h28a8 8 0 0 1 8 8v76a8 8 0 0 1-8 8H36a8 8 0 0 1-8-8V12a8 8 0 0 1 8-8zM35 15v70h30V15z','M45 40l14 10-14 10z']},
-    mega:  {f:['M12 40h16l44-24v68L28 60H12z','M28 60h10l5 22h-9z'], s:['M80 38q6 12 0 24','M87 30q10 20 0 40']},
-    site:  {f:['M6 16h88v10H6z','M14 34h36v6H14z','M14 45h28v3H14z','M14 52h32v3H14z','M14 62h16v6H14z','M58 34h28v34H58z'], s:['M6 16h88v68H6z']},
-    bust:  {f:['M50 15a15 15 0 1 1 0 30a15 15 0 1 1 0-30z','M44 42h12v14H44z','M12 96c0-22 16-36 38-36s38 14 38 36z']}
-  };
-  var SH = {}, TH = new Float32Array(N);
-
-  function pick(pts, S){
-    var cnt = pts.length / 2, idx = [], out = new Float32Array(N * 2), i, j, t;
-    for (i = 0; i < cnt; i++) idx.push(i);
-    for (i = cnt - 1; i > 0; i--){ j = (Math.random() * (i + 1)) | 0; t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
-    for (i = 0; i < N; i++){ var k = idx[i % cnt]; out[i*2] = (pts[k*2] + Math.random()) / S; out[i*2+1] = (pts[k*2+1] + Math.random()) / S; }
-    return out;
-  }
-  function sample(d){
-    var S = 128, c = document.createElement('canvas'); c.width = c.height = S;
-    var g = c.getContext('2d'); g.scale(S / 100, S / 100);
-    g.fillStyle = g.strokeStyle = '#fff'; g.lineWidth = 3.2; g.lineCap = g.lineJoin = 'round';
-    (d.f || []).forEach(function(p){ g.fill(new Path2D(p), 'evenodd'); });
-    (d.s || []).forEach(function(p){ g.stroke(new Path2D(p)); });
-    var px = g.getImageData(0, 0, S, S).data, pts = [];
-    for (var y = 0; y < S; y++) for (var x = 0; x < S; x++) if (px[(y*S + x)*4 + 3] > 127) pts.push(x, y);
-    return pick(pts, S);
-  }
-  function grid(){ // ▶ se desfaz em pontos que contam
-    var out = new Float32Array(N * 2), c = 12;
-    for (var i = 0; i < N; i++){ var k = i % (c*c); out[i*2] = .1 + .8 * (k % c) / (c - 1); out[i*2+1] = .1 + .8 * Math.floor(k / c) / (c - 1); }
-    return out;
-  }
-  function disc(){ // mancha: pontos num disco, deformados a cada quadro
-    var out = new Float32Array(N * 2);
-    for (var i = 0; i < N; i++){ var r = Math.sqrt(Math.random()) * .42, a = Math.random() * 6.2832; TH[i] = a; out[i*2] = .5 + r * Math.cos(a); out[i*2+1] = .5 + r * Math.sin(a); }
-    return out;
-  }
-
-  var X = new Float32Array(N), Y = new Float32Array(N), VX = new Float32Array(N), VY = new Float32Array(N);
-  var K = new Float32Array(N), P = new Float32Array(N);
-  var W, H, dpr, cur = null, T = null, alpha = 0, ringA = 0, ringAl = 0, boost = 0;
-  var col = [139, 92, 246], mx = -1e4, my = -1e4, running = false, lastWake = 0, started = false;
-  var RT = 'ROTEIRO · CAPTAÇÃO · EDIÇÃO · DESIGN · IA · ';
-
-  function resize(){
-    dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
-    cv.width = (W * dpr) | 0; cv.height = (H * dpr) | 0; measure(); wake();
-  }
-  function shape(name){ // cada figura só é gerada na primeira vez que aparece
-    if (!SH[name]) SH[name] = name === 'grid' ? grid() : name === 'blob' ? disc() : sample(DEF[name]);
-    return SH[name];
-  }
-  var geo = null; // posição do slot na página (cache: medir a cada quadro força layout)
-  function measure(){
-    if (!cur){ geo = null; return; }
-    var r = cur.el.getBoundingClientRect();
-    geo = r.width ? {x: r.left, y: r.top + window.scrollY, w: r.width, h: r.height} : null;
-  }
-  function go(sec){
-    if (!started) return;
-    var el = sec.hasAttribute('data-px') ? sec : sec.querySelector('[data-px]');
-    if (!el){ cur = null; geo = null; wake(); return; }
-    if (cur && cur.el === el) return;
-    cur = {el: el, name: el.getAttribute('data-px'), ring: el.hasAttribute('data-ring'), a: parseFloat(el.getAttribute('data-a') || '1'), t0: performance.now()};
-    T = shape(cur.name); ringAl = 0; measure();
-    if (reduce) alpha = cur.a;
-    wake();
-  }
-  function wake(){ lastWake = performance.now(); if (!running && started){ running = true; requestAnimationFrame(tick); } }
-
-  function drawRing(cx, cy, rad){
-    var fs = small ? 10 : 11;
-    ctx.font = '500 ' + fs + 'px "JetBrains Mono", ui-monospace, monospace';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    var cw = ctx.measureText('M').width + (small ? 1.6 : 2.4), per = RT.length;
-    var reps = Math.max(1, Math.round(6.2832 * rad / (cw * per))), n = per * reps, step = 6.2832 / n;
-    for (var i = 0; i < n; i++){
-      var a = ringA + i * step, c = Math.cos(a), s = Math.sin(a);
-      ctx.setTransform(dpr*c, dpr*s, -dpr*s, dpr*c, dpr*(cx + rad*s), dpr*(cy - rad*c));
-      ctx.fillText(RT[i % per], 0, 0);
-    }
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function tick(now){
-    var sy = window.scrollY, ts = now / 1000, i;
-    var r = geo && cur ? {left: geo.x, top: geo.y - sy, width: geo.w, height: geo.h, bottom: geo.y - sy + geo.h} : null;
-    var want = r ? cur.a : 0;
-    alpha = reduce ? want : alpha + (want - alpha) * .07;
-    // cor: roxo no fundo escuro, quase preto no fundo roxo
-    var dark = document.body.getAttribute('data-theme') === 'purple', tc = dark ? [10, 9, 14] : [139, 92, 246];
-    for (i = 0; i < 3; i++) col[i] = reduce ? tc[i] : col[i] + (tc[i] - col[i]) * .08;
-    boost *= .965;
-
-    if (r){
-      var ox = r.left, oy = r.top + sy, w = r.width, h = r.height, blob = cur.name === 'blob', amp = .07 + boost * .2;
-      var mpx = mx, mpy = my + sy;
-      for (i = 0; i < N; i++){
-        var nx = T[i*2], ny = T[i*2+1];
-        if (blob){
-          var th = TH[i], R = 1 + amp * (Math.sin(3*th + ts*.9) * .5 + Math.sin(5*th - ts*1.3) * .3 + Math.sin(2*th + ts*.6) * .2);
-          nx = .5 + (nx - .5) * R; ny = .5 + (ny - .5) * R;
-        }
-        var tx = ox + nx * w, ty = oy + ny * h;
-        if (reduce){ X[i] = tx; Y[i] = ty; continue; }
-        tx += Math.sin(ts * 1.3 + P[i]) * 1.3; ty += Math.cos(ts * 1.1 + P[i] * 1.7) * 1.3;
-        var ax = (tx - X[i]) * K[i], ay = (ty - Y[i]) * K[i];
-        var dx = X[i] - mpx, dy = Y[i] - mpy, d2 = dx*dx + dy*dy;
-        if (d2 < 6400){ var d = Math.sqrt(d2) + .01, f = (1 - d / 80) * 2.4 / d; ax += dx * f; ay += dy * f; }
-        VX[i] = (VX[i] + ax) * .8; VY[i] = (VY[i] + ay) * .8; X[i] += VX[i]; Y[i] += VY[i];
-      }
-    }
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    if (alpha > .01){
-      var c = 'rgb(' + (col[0]|0) + ',' + (col[1]|0) + ',' + (col[2]|0) + ')', rad = small ? 1.4 : 1.8;
-      ctx.globalAlpha = alpha; ctx.fillStyle = c; ctx.beginPath();
-      for (i = 0; i < N; i++){ var yy = Y[i] - sy; if (yy < -4 || yy > H + 4) continue; ctx.moveTo(X[i] + rad, yy); ctx.arc(X[i], yy, rad, 0, 6.2832); }
-      ctx.fill();
-      if (!reduce && r && cur.ring){
-        ringAl += ((now - cur.t0 > 650 ? 1 : 0) - ringAl) * .06;
-        ringA += (sy * .0016 - ringA) * .12;
-        if (ringAl > .01){ ctx.globalAlpha = alpha * ringAl * .85; drawRing(r.left + r.width / 2, r.top + r.height / 2, r.width * (small ? .6 : .64)); }
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    var vis = r && r.bottom > -150 && r.top < H + 150;
-    var keep = !document.hidden && !reduce && (vis || now - lastWake < 2600 || (alpha > .02 && want === 0));
-    if (keep) requestAnimationFrame(tick); else running = false;
-  }
-
-  function start(){
-    for (var i = 0; i < N; i++){ K[i] = .018 + Math.random() * .03; P[i] = Math.random() * 6.2832; }
-    // ponto de partida: espalhados em volta do primeiro capítulo, juntam em ~1 s
-    var sec = window.__ch || document.querySelector('[data-ch]'), sy = window.scrollY;
-    for (i = 0; i < N; i++){ X[i] = Math.random() * innerWidth; Y[i] = sy + Math.random() * innerHeight; }
-    started = true; resize();
-    document.documentElement.classList.add('px-on'); cv.classList.add('on');
-    go(sec);
-    addEventListener('scroll', wake, {passive: true});
-    addEventListener('resize', resize);
-    document.addEventListener('visibilitychange', wake);
-    if (window.ResizeObserver) new ResizeObserver(function(){ measure(); wake(); }).observe(document.body); // Reels mudam de altura ao carregar
-    if (fine){
-      addEventListener('pointermove', function(e){ mx = e.clientX; my = e.clientY; if (cur) wake(); }, {passive: true});
-      document.documentElement.addEventListener('pointerleave', function(){ mx = my = -1e4; });
-    }
-    var iw = document.querySelector('.idx-wrap');
-    if (iw) iw.addEventListener('pointerover', function(e){ if (e.target.closest('li')) { boost = Math.min(1, boost + .5); wake(); } });
-  }
-  window.pxGo = go;
-  window.pxPulse = function(){ boost = 1; wake(); };
-  // começa depois que a página assenta (não disputa a primeira carga com os Reels)
-  function later(){ setTimeout(function(){ (window.requestIdleCallback || function(f){ setTimeout(f, 300); })(start, {timeout: 4000}); }, 1200); }
-  if (document.readyState === 'complete') later(); else addEventListener('load', later);
+  var reelBelt = quotes.length && quotes[0].closest('.belt');
+  var outer = new IntersectionObserver(function(es){
+    if (!es[0].isIntersecting) return;
+    outer.disconnect();
+    var inner = new IntersectionObserver(function(xs){
+      xs.forEach(function(x){ if (x.isIntersecting){ mount(x.target); inner.unobserve(x.target); } });
+    }, {root: reelBelt, rootMargin: '0px 700px'});
+    quotes.forEach(function(q){ inner.observe(q); });
+  }, {rootMargin: '900px 0px'});
+  outer.observe(reelBelt);
 })();
 </script>
 </body>
