@@ -305,6 +305,57 @@
   .end .cta .btn{min-height:44px;padding:10px 20px;font-size:14px}
   .end small{color:var(--c-mut);font-size:13px}
 
+  /* V2 · PARTÍCULAS: um canvas fixo atrás do conteúdo; cada capítulo tem um "slot" onde os pontos formam a figura */
+  .px{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity .9s var(--ease)}
+  .px.on{opacity:1}
+  main{position:relative;z-index:1}
+  .px-slot{display:none}
+  .js .px-slot{display:block;width:min(220px,100%);aspect-ratio:1;pointer-events:none}
+  .ch-aside{display:grid;gap:0;justify-items:end;align-content:end}
+  .js .ch-aside .px-slot{margin:44px 36px 48px 0}
+  .ch-aside .lead2{justify-self:stretch}
+  .idx-wrap{position:relative}
+  .ch-name .wrap{position:relative}
+  .js .px-behind{position:absolute;right:0;top:50%;width:min(560px,82%);transform:translateY(-50%)}
+  .js .ch-name .px-behind{width:min(540px,56%)}
+  .visual .tri-fill{transition:opacity .9s var(--ease)}
+  .px-on .visual .tri-fill{opacity:0}
+
+  /* V2 · TOGGLE ORGÂNICO / ANÚNCIO (aparece nos capítulos 02 e 03) */
+  .kind{
+    position:fixed;top:76px;left:50%;z-index:38;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:999px;
+    background:color-mix(in srgb,var(--c-bg) 86%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border:1px solid var(--c-line);opacity:0;visibility:hidden;transform:translate(-50%,-10px);
+    transition:opacity .4s var(--ease),transform .6s var(--ease),visibility 0s .4s,background-color .6s var(--ease),border-color .6s var(--ease);
+  }
+  .kind.on{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .4s var(--ease),transform .6s var(--ease),background-color .6s var(--ease),border-color .6s var(--ease)}
+  .kind a{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:38px;padding:0 18px;border-radius:999px;text-decoration:none;color:var(--c-fg);transition:color .5s var(--ease)}
+  .kind a b{font:400 19px/1 'Anton',sans-serif;letter-spacing:.02em}
+  .kind a[aria-current="true"]{color:var(--c-btn-fg)}
+  .kind i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:var(--c-btn);transition:transform .6s var(--ease),background-color .6s var(--ease)}
+  .kind[data-k="03"] i{transform:translateX(100%)}
+
+  /* V2 · MONTE SEU TIME */
+  .team{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px 56px;align-items:end;margin-top:104px;padding-top:28px;border-top:1px solid var(--c-line)}
+  .team h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(44px,6vw,88px);line-height:.92;margin:14px 0 16px}
+  .team-q{font-size:19px;font-weight:700}
+  .team-opts{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .team-opts button{
+    display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 20px;border-radius:999px;cursor:pointer;
+    font:700 15px/1 'Manrope',sans-serif;color:var(--c-fg);background:transparent;border:1px solid var(--c-fg);
+    transition:background-color .3s var(--ease),color .3s var(--ease),transform .4s var(--ease);
+  }
+  .team-opts button::before{content:"+";font:500 15px/1 var(--mono);transition:transform .4s var(--ease)}
+  .team-opts button:hover{transform:translateY(-2px)}
+  .team-opts button[aria-pressed="true"]{background:var(--c-btn);border-color:var(--c-btn);color:var(--c-btn-fg)}
+  .team-opts button[aria-pressed="true"]::before{transform:rotate(45deg)}
+  .team-out{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:28px}
+  .team-n{font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(150px,21vw,300px);line-height:.8;display:inline-block}
+  .team-n.bump{animation:bump .8s var(--ease)}
+  .team-out p{font-size:20px;line-height:1.35;font-weight:700}
+  .team-out .mono{display:block;margin-bottom:10px;font-weight:500}
+  @keyframes bump{30%{transform:translateY(-7%) scale(1.04)}}
+
   /* MOVIMENTO */
   @media (prefers-reduced-motion:no-preference){
     .js h1 .line > span{animation:rise 1.1s var(--ease) both}
@@ -334,6 +385,10 @@
     .rail{grid-auto-columns:minmax(140px,42%);margin-right:-22px;padding-right:22px}
     .about{grid-template-columns:1fr}
     .credits{grid-template-columns:1fr 1fr}
+    .ch-aside{justify-items:center}
+    .js .ch-aside .px-slot{width:150px;margin:34px 0 30px}
+    .js .ch-name .px-behind{width:min(420px,80%)}
+    .team{grid-template-columns:1fr;margin-top:80px}
   }
   @media (max-width:600px){
     .wrap{padding:0 16px}
@@ -356,6 +411,9 @@
     .credits{grid-template-columns:1fr;margin-top:64px}
     .shots{gap:10px}
     .shots figcaption{font-size:12px}
+    .kind a{padding:0 14px;min-height:36px}
+    .team-out{gap:20px}
+    .team-out p{font-size:18px}
   }
 </style>
 </head>
@@ -379,6 +437,14 @@
   <span class="mono hud-count"><span id="hudCount">00 / 08</span><span class="hud-prog"><b id="hudBar"></b></span></span>
   <span class="mono"><span id="hudNum">(00)</span> <span id="hudLabel">Play — início</span></span>
 </div>
+
+<canvas class="px" aria-hidden="true"></canvas>
+
+<nav class="kind" id="kind" aria-label="Orgânico ou anúncio" data-k="02" aria-hidden="true">
+  <i aria-hidden="true"></i>
+  <a href="#videos" data-k="02" aria-current="true" aria-label="Orgânico: 11 Reels" tabindex="-1"><span class="mono">Orgânico</span><b>11</b></a>
+  <a href="#anuncios" data-k="03" aria-current="false" aria-label="Anúncio: 8 criativos" tabindex="-1"><span class="mono">Anúncio</span><b>8</b></a>
+</nav>
 
 <nav class="menu" id="menu" aria-label="Índice" role="dialog" aria-modal="true">
   <div class="menu-top">
@@ -418,13 +484,13 @@
         <a class="btn" href="https://wa.me/5511997468837" target="_blank" rel="noopener">Falar no WhatsApp</a>
       </div>
     </div>
-    <div class="visual" aria-hidden="true">
+    <div class="visual" aria-hidden="true" data-px="play">
       <svg viewBox="0 0 440 460">
         <defs>
           <pattern id="dots" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="6.5" cy="6.5" r="2.4" fill="#8b5cf6"/></pattern>
         </defs>
         <g class="tri-dots">
-          <polygon points="96,58 372,230 96,402" fill="url(#dots)"/>
+          <polygon class="tri-fill" points="96,58 372,230 96,402" fill="url(#dots)"/>
           <polygon points="96,58 372,230 96,402" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-linejoin="round"/>
         </g>
         <g stroke="currentColor" stroke-width="1" opacity=".6">
@@ -445,6 +511,7 @@
   <div class="wrap">
     <div class="ch-head">
       <div><span class="ch-num mono">(01) — Números</span><h2>Em números</h2></div>
+      <div class="ch-aside" aria-hidden="true"><div class="px-slot" data-px="grid" data-ring></div></div>
     </div>
     <div class="stat"><b class="count" data-to="6">6</b><p><span class="mono">[ Tempo de estrada ]</span>anos em marketing digital, 4 deles em agência</p></div>
     <div class="stat"><b class="count" data-to="35" data-suffix="+">35<i>+</i></b><p><span class="mono">[ Vídeo ]</span>clientes atendidos como videomaker</p></div>
@@ -461,7 +528,8 @@
         <span class="ch-num mono">(02) — Vídeos</span><h2>Reels</h2>
         <p class="brk mono" aria-label="Roteiro, captação e edição"><span>[ Roteiro ]</span><i></i><span>[ Captação ]</span><i></i><span>[ Edição ]</span></p>
       </div>
-      <p class="lead2">Roteiro, captação e edição para marcas de nichos diferentes. Dê play direto aqui.</p>
+      <div class="ch-aside"><div class="px-slot" data-px="phone" data-ring aria-hidden="true"></div>
+        <p class="lead2">Roteiro, captação e edição para marcas de nichos diferentes. Dê play direto aqui.</p></div>
     </div>
     <ul class="reels">
       <li class="card"><blockquote class="ig" data-instgrm-permalink="https://www.instagram.com/p/DdR7VBUvK1J/"><a href="https://www.instagram.com/p/DdR7VBUvK1J/" target="_blank" rel="noopener"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i>Ver no Instagram</a></blockquote>
@@ -498,7 +566,8 @@
         <span class="ch-num mono">(03) — Anúncios</span><h2>Anúncios</h2>
         <p class="brk mono" aria-label="Roteiro e edição para Meta Ads"><span>[ Roteiro ]</span><i></i><span>[ Edição ]</span><i></i><span>[ Meta Ads ]</span></p>
       </div>
-      <p class="lead2">Criativos em vídeo para Meta Ads, do roteiro à edição. Passe o mouse para a prévia; clique para assistir com som.</p>
+      <div class="ch-aside"><div class="px-slot" data-px="mega" data-ring aria-hidden="true"></div>
+        <p class="lead2">Criativos em vídeo para Meta Ads, do roteiro à edição. Passe o mouse para a prévia; clique para assistir com som.</p></div>
     </div>
     <ul class="reels">
       <li class="card"><div class="vid"><video src="ads/081.mp4" poster="ads/081.jpg" preload="none" playsinline muted width="720" height="1280" aria-label="Anúncio 081 — carro"></video><button class="vid-btn" type="button" aria-label="Assistir com som: Anúncio 081 — carro"><i class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></i><span class="mono">Clique: tela cheia com som</span></button></div>
@@ -526,6 +595,7 @@
   <div class="wrap">
     <div class="ch-head">
       <div><span class="ch-num mono">(04) — Projetos</span><h2>Projetos autorais</h2></div>
+      <div class="ch-aside" aria-hidden="true"><div class="px-slot" data-px="site" data-ring></div></div>
     </div>
 
     <div class="sub">
@@ -583,12 +653,30 @@
       <div><span class="ch-num mono">(05) — Habilidades</span><h2>Índice</h2></div>
       <p class="lead2">Funções, ferramentas e marcas com quem trabalhei.</p>
     </div>
+    <div class="idx-wrap">
+    <div class="px-slot px-behind" data-px="blob" data-a=".5" aria-hidden="true"></div>
     <div class="idx"><p class="mono">[ Funções ]</p>
       <ul><li>Roteiro</li><li>Captação</li><li>Edição</li><li>Design</li><li>Copywriting</li><li>Calendário editorial</li><li>Roteiro de anúncios</li><li>Social media</li></ul></div>
     <div class="idx"><p class="mono">[ Ferramentas ]</p>
       <ul><li>CapCut</li><li>Remotion</li><li>Photoshop</li><li>Canva</li><li>ChatGPT</li><li>Claude</li><li>Claude Code</li><li>Gemini</li><li>Magnific</li><li>Google Flow</li><li>Dreamina</li><li>ElevenLabs</li></ul></div>
     <div class="idx"><p class="mono">[ Marcas nos Reels ]</p>
       <ul><li>Auto Design</li><li>Auto Prosperità</li><li>Aliquantum Suzuki</li><li>Island Motors SJC</li><li>Dr. Roberto Dente</li><li>Dra. Adriana Menezes</li><li>Barella Caminhões</li></ul></div>
+    </div>
+
+    <div class="team">
+      <div>
+        <p class="mono">[ Monte seu time ]</p>
+        <h3>Monte seu time</h3>
+        <p class="team-q">Ligue as funções que o seu conteúdo precisa.</p>
+        <div class="team-opts" role="group" aria-label="Funções">
+          <button type="button" aria-pressed="false">Roteiro</button><button type="button" aria-pressed="false">Captação</button><button type="button" aria-pressed="false">Edição</button><button type="button" aria-pressed="false">Design</button><button type="button" aria-pressed="false">IA</button>
+        </div>
+      </div>
+      <div class="team-out">
+        <b class="team-n" aria-hidden="true">1</b>
+        <p><span class="mono">[ Pessoas no time ]</span><span id="teamMsg" aria-live="polite">Ligue uma função.</span></p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -597,6 +685,7 @@
   <div class="wrap">
     <div class="ch-head">
       <div><span class="ch-num mono">(06) — Sobre</span><h2>Arte + estratégia</h2></div>
+      <div class="ch-aside" aria-hidden="true"><div class="px-slot" data-px="bust" data-ring></div></div>
     </div>
     <div class="about">
       <div>
@@ -616,6 +705,7 @@
 <!-- (07) RENAN -->
 <section class="ch ch-name" id="renan" data-ch="07" data-theme="purple" data-label="Renan — assinatura">
   <div class="wrap">
+    <div class="px-slot px-behind" data-px="bust" data-a=".55" aria-hidden="true"></div>
     <span class="ch-num mono">(07) — Assinatura</span>
     <p class="big-name" aria-label="Renan">Renan</p>
     <p class="closing">Escrevo, filmo, edito, desenho e penso a estratégia: o ciclo inteiro do conteúdo, numa pessoa só.</p>
@@ -680,7 +770,19 @@
     hudCount.textContent = n + ' / ' + ('0' + total).slice(-2);
     hudBar.style.transform = 'scaleX(' + (parseInt(n, 10) / total) + ')';
     menuLinks.forEach(function(a){ a.setAttribute('aria-current', a.getAttribute('data-to') === n ? 'true' : 'false'); });
+    // toggle Orgânico / Anúncio só aparece nos capítulos de vídeo
+    var on = n === '02' || n === '03';
+    kind.classList.toggle('on', on);
+    kind.setAttribute('aria-hidden', on ? 'false' : 'true');
+    if (on) kind.setAttribute('data-k', n);
+    kindLinks.forEach(function(a){
+      a.tabIndex = on ? 0 : -1;
+      if (on) a.setAttribute('aria-current', a.getAttribute('data-k') === n ? 'true' : 'false');
+    });
+    window.__ch = sec;
+    if (window.pxGo) window.pxGo(sec);
   }
+  var kind = document.getElementById('kind'), kindLinks = [].slice.call(kind.querySelectorAll('a'));
   if ('IntersectionObserver' in window){
     var cio = new IntersectionObserver(function(es){
       es.forEach(function(e){ if (e.isIntersecting) setActive(e.target); });
@@ -761,6 +863,19 @@
     if (!document.fullscreenElement) boxes.forEach(function(b){ if (b.classList.contains('full')) reset(b); });
   });
 
+  // Monte seu time: liga funções, o número de pessoas continua 1
+  var teamBtns = [].slice.call(document.querySelectorAll('.team-opts button'));
+  var teamN = document.querySelector('.team-n'), teamMsg = document.getElementById('teamMsg');
+  teamBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+      var k = teamBtns.filter(function(x){ return x.getAttribute('aria-pressed') === 'true'; }).length;
+      teamMsg.textContent = k === 0 ? 'Ligue uma função.' : k === teamBtns.length ? 'Todas as funções, 1 pessoa: o Renan.' : k + (k === 1 ? ' função' : ' funções') + ', 1 pessoa: o Renan.';
+      teamN.classList.remove('bump'); void teamN.offsetWidth; teamN.classList.add('bump');
+      if (window.pxPulse) window.pxPulse();
+    });
+  });
+
   // Compartilhar (Web Share API; sem ela, copia o link)
   var share = document.getElementById('share');
   share.addEventListener('click', function(){
@@ -794,6 +909,175 @@
     es.forEach(function(e){ if (e.isIntersecting){ mount(e.target); io.unobserve(e.target); } });
   }, {rootMargin:'900px 0px'});
   quotes.forEach(function(q){ io.observe(q); });
+})();
+</script>
+<script>
+// V2 · Partículas: os pontos mudam de forma a cada capítulo (▶, grade, celular, megafone, site, mancha, silhueta)
+// e um anel de texto gira com o scroll. Canvas 2D, pausa fora da tela, menos pontos no celular,
+// sem movimento com "reduzir movimento" (a figura aparece parada).
+(function(){
+  var cv = document.querySelector('.px');
+  if (!cv || !cv.getContext || !window.Path2D) return;
+  var ctx = cv.getContext('2d');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var small = matchMedia('(max-width: 600px)').matches;
+  var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var N = small ? 340 : 700;
+  var DEF = {
+    play:  {f:['M21.8 12.6L84.5 50L21.8 87.4Z']},
+    phone: {f:['M36 4h28a8 8 0 0 1 8 8v76a8 8 0 0 1-8 8H36a8 8 0 0 1-8-8V12a8 8 0 0 1 8-8zM35 15v70h30V15z','M45 40l14 10-14 10z']},
+    mega:  {f:['M12 40h16l44-24v68L28 60H12z','M28 60h10l5 22h-9z'], s:['M80 38q6 12 0 24','M87 30q10 20 0 40']},
+    site:  {f:['M6 16h88v10H6z','M14 34h36v6H14z','M14 45h28v3H14z','M14 52h32v3H14z','M14 62h16v6H14z','M58 34h28v34H58z'], s:['M6 16h88v68H6z']},
+    bust:  {f:['M50 15a15 15 0 1 1 0 30a15 15 0 1 1 0-30z','M44 42h12v14H44z','M12 96c0-22 16-36 38-36s38 14 38 36z']}
+  };
+  var SH = {}, TH = new Float32Array(N);
+
+  function pick(pts, S){
+    var cnt = pts.length / 2, idx = [], out = new Float32Array(N * 2), i, j, t;
+    for (i = 0; i < cnt; i++) idx.push(i);
+    for (i = cnt - 1; i > 0; i--){ j = (Math.random() * (i + 1)) | 0; t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+    for (i = 0; i < N; i++){ var k = idx[i % cnt]; out[i*2] = (pts[k*2] + Math.random()) / S; out[i*2+1] = (pts[k*2+1] + Math.random()) / S; }
+    return out;
+  }
+  function sample(d){
+    var S = 128, c = document.createElement('canvas'); c.width = c.height = S;
+    var g = c.getContext('2d'); g.scale(S / 100, S / 100);
+    g.fillStyle = g.strokeStyle = '#fff'; g.lineWidth = 3.2; g.lineCap = g.lineJoin = 'round';
+    (d.f || []).forEach(function(p){ g.fill(new Path2D(p), 'evenodd'); });
+    (d.s || []).forEach(function(p){ g.stroke(new Path2D(p)); });
+    var px = g.getImageData(0, 0, S, S).data, pts = [];
+    for (var y = 0; y < S; y++) for (var x = 0; x < S; x++) if (px[(y*S + x)*4 + 3] > 127) pts.push(x, y);
+    return pick(pts, S);
+  }
+  function grid(){ // ▶ se desfaz em pontos que contam
+    var out = new Float32Array(N * 2), c = 12;
+    for (var i = 0; i < N; i++){ var k = i % (c*c); out[i*2] = .1 + .8 * (k % c) / (c - 1); out[i*2+1] = .1 + .8 * Math.floor(k / c) / (c - 1); }
+    return out;
+  }
+  function disc(){ // mancha: pontos num disco, deformados a cada quadro
+    var out = new Float32Array(N * 2);
+    for (var i = 0; i < N; i++){ var r = Math.sqrt(Math.random()) * .42, a = Math.random() * 6.2832; TH[i] = a; out[i*2] = .5 + r * Math.cos(a); out[i*2+1] = .5 + r * Math.sin(a); }
+    return out;
+  }
+
+  var X = new Float32Array(N), Y = new Float32Array(N), VX = new Float32Array(N), VY = new Float32Array(N);
+  var K = new Float32Array(N), P = new Float32Array(N);
+  var W, H, dpr, cur = null, T = null, alpha = 0, ringA = 0, ringAl = 0, boost = 0;
+  var col = [139, 92, 246], mx = -1e4, my = -1e4, running = false, lastWake = 0, started = false;
+  var RT = 'ROTEIRO · CAPTAÇÃO · EDIÇÃO · DESIGN · IA · ';
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+    cv.width = (W * dpr) | 0; cv.height = (H * dpr) | 0; measure(); wake();
+  }
+  function shape(name){ // cada figura só é gerada na primeira vez que aparece
+    if (!SH[name]) SH[name] = name === 'grid' ? grid() : name === 'blob' ? disc() : sample(DEF[name]);
+    return SH[name];
+  }
+  var geo = null; // posição do slot na página (cache: medir a cada quadro força layout)
+  function measure(){
+    if (!cur){ geo = null; return; }
+    var r = cur.el.getBoundingClientRect();
+    geo = r.width ? {x: r.left, y: r.top + window.scrollY, w: r.width, h: r.height} : null;
+  }
+  function go(sec){
+    if (!started) return;
+    var el = sec.hasAttribute('data-px') ? sec : sec.querySelector('[data-px]');
+    if (!el){ cur = null; geo = null; wake(); return; }
+    if (cur && cur.el === el) return;
+    cur = {el: el, name: el.getAttribute('data-px'), ring: el.hasAttribute('data-ring'), a: parseFloat(el.getAttribute('data-a') || '1'), t0: performance.now()};
+    T = shape(cur.name); ringAl = 0; measure();
+    if (reduce) alpha = cur.a;
+    wake();
+  }
+  function wake(){ lastWake = performance.now(); if (!running && started){ running = true; requestAnimationFrame(tick); } }
+
+  function drawRing(cx, cy, rad){
+    var fs = small ? 10 : 11;
+    ctx.font = '500 ' + fs + 'px "JetBrains Mono", ui-monospace, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    var cw = ctx.measureText('M').width + (small ? 1.6 : 2.4), per = RT.length;
+    var reps = Math.max(1, Math.round(6.2832 * rad / (cw * per))), n = per * reps, step = 6.2832 / n;
+    for (var i = 0; i < n; i++){
+      var a = ringA + i * step, c = Math.cos(a), s = Math.sin(a);
+      ctx.setTransform(dpr*c, dpr*s, -dpr*s, dpr*c, dpr*(cx + rad*s), dpr*(cy - rad*c));
+      ctx.fillText(RT[i % per], 0, 0);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function tick(now){
+    var sy = window.scrollY, ts = now / 1000, i;
+    var r = geo && cur ? {left: geo.x, top: geo.y - sy, width: geo.w, height: geo.h, bottom: geo.y - sy + geo.h} : null;
+    var want = r ? cur.a : 0;
+    alpha = reduce ? want : alpha + (want - alpha) * .07;
+    // cor: roxo no fundo escuro, quase preto no fundo roxo
+    var dark = document.body.getAttribute('data-theme') === 'purple', tc = dark ? [10, 9, 14] : [139, 92, 246];
+    for (i = 0; i < 3; i++) col[i] = reduce ? tc[i] : col[i] + (tc[i] - col[i]) * .08;
+    boost *= .965;
+
+    if (r){
+      var ox = r.left, oy = r.top + sy, w = r.width, h = r.height, blob = cur.name === 'blob', amp = .07 + boost * .2;
+      var mpx = mx, mpy = my + sy;
+      for (i = 0; i < N; i++){
+        var nx = T[i*2], ny = T[i*2+1];
+        if (blob){
+          var th = TH[i], R = 1 + amp * (Math.sin(3*th + ts*.9) * .5 + Math.sin(5*th - ts*1.3) * .3 + Math.sin(2*th + ts*.6) * .2);
+          nx = .5 + (nx - .5) * R; ny = .5 + (ny - .5) * R;
+        }
+        var tx = ox + nx * w, ty = oy + ny * h;
+        if (reduce){ X[i] = tx; Y[i] = ty; continue; }
+        tx += Math.sin(ts * 1.3 + P[i]) * 1.3; ty += Math.cos(ts * 1.1 + P[i] * 1.7) * 1.3;
+        var ax = (tx - X[i]) * K[i], ay = (ty - Y[i]) * K[i];
+        var dx = X[i] - mpx, dy = Y[i] - mpy, d2 = dx*dx + dy*dy;
+        if (d2 < 6400){ var d = Math.sqrt(d2) + .01, f = (1 - d / 80) * 2.4 / d; ax += dx * f; ay += dy * f; }
+        VX[i] = (VX[i] + ax) * .8; VY[i] = (VY[i] + ay) * .8; X[i] += VX[i]; Y[i] += VY[i];
+      }
+    }
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    if (alpha > .01){
+      var c = 'rgb(' + (col[0]|0) + ',' + (col[1]|0) + ',' + (col[2]|0) + ')', rad = small ? 1.4 : 1.8;
+      ctx.globalAlpha = alpha; ctx.fillStyle = c; ctx.beginPath();
+      for (i = 0; i < N; i++){ var yy = Y[i] - sy; if (yy < -4 || yy > H + 4) continue; ctx.moveTo(X[i] + rad, yy); ctx.arc(X[i], yy, rad, 0, 6.2832); }
+      ctx.fill();
+      if (!reduce && r && cur.ring){
+        ringAl += ((now - cur.t0 > 650 ? 1 : 0) - ringAl) * .06;
+        ringA += (sy * .0016 - ringA) * .12;
+        if (ringAl > .01){ ctx.globalAlpha = alpha * ringAl * .85; drawRing(r.left + r.width / 2, r.top + r.height / 2, r.width * (small ? .6 : .64)); }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    var vis = r && r.bottom > -150 && r.top < H + 150;
+    var keep = !document.hidden && !reduce && (vis || now - lastWake < 2600 || (alpha > .02 && want === 0));
+    if (keep) requestAnimationFrame(tick); else running = false;
+  }
+
+  function start(){
+    for (var i = 0; i < N; i++){ K[i] = .018 + Math.random() * .03; P[i] = Math.random() * 6.2832; }
+    // ponto de partida: espalhados em volta do primeiro capítulo, juntam em ~1 s
+    var sec = window.__ch || document.querySelector('[data-ch]'), sy = window.scrollY;
+    for (i = 0; i < N; i++){ X[i] = Math.random() * innerWidth; Y[i] = sy + Math.random() * innerHeight; }
+    started = true; resize();
+    document.documentElement.classList.add('px-on'); cv.classList.add('on');
+    go(sec);
+    addEventListener('scroll', wake, {passive: true});
+    addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', wake);
+    if (window.ResizeObserver) new ResizeObserver(function(){ measure(); wake(); }).observe(document.body); // Reels mudam de altura ao carregar
+    if (fine){
+      addEventListener('pointermove', function(e){ mx = e.clientX; my = e.clientY; if (cur) wake(); }, {passive: true});
+      document.documentElement.addEventListener('pointerleave', function(){ mx = my = -1e4; });
+    }
+    var iw = document.querySelector('.idx-wrap');
+    if (iw) iw.addEventListener('pointerover', function(e){ if (e.target.closest('li')) { boost = Math.min(1, boost + .5); wake(); } });
+  }
+  window.pxGo = go;
+  window.pxPulse = function(){ boost = 1; wake(); };
+  // começa depois que a página assenta (não disputa a primeira carga com os Reels)
+  function later(){ setTimeout(function(){ (window.requestIdleCallback || function(f){ setTimeout(f, 300); })(start, {timeout: 4000}); }, 1200); }
+  if (document.readyState === 'complete') later(); else addEventListener('load', later);
 })();
 </script>
 </body>
